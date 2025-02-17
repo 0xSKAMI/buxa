@@ -7,7 +7,9 @@ using Discord.Commands;
 using Microsoft.Win32.SafeHandles; // For command handling (though not used here)
 
 public class Program
-{
+{	
+	public static List<User> users = new List<User>();
+
 	// Main entry point of the application
 	private static async Task Main(string[] args)
 	{
@@ -27,8 +29,6 @@ public class Program
 		string token = Env.GetString("TOKEN");
 
 		// Subscribe to events that the bot should listen to
-		_client.Ready += AddCommand;
-		_client.MessageReceived += PrintMessage; // Event triggered when a message is received
 		_client.PresenceUpdated += PrintActivity; // Event triggered when a user's presence changes (activity, status, etc.)
 		_client.Log += LogMessage; // Event triggered for logging messages from the bot
 
@@ -50,19 +50,25 @@ public class Program
 	}
 
 	// This method is called when a user's activity or status changes (presence update)
-	private static async Task PrintActivity(SocketUser user, SocketPresence oldPresence, SocketPresence newPresence)
+ private static async Task PrintActivity(SocketUser user, SocketPresence oldPresence, SocketPresence newPresence)
 	{
-		if(oldPresence.Activities.Any())
+		Console.WriteLine("saba");
+
+		if(oldPresence.Activities.Any() && !newPresence.Activities.Any())
 		{
-			foreach(var activity in user.Activities)
+			foreach(var activity in oldPresence.Activities)
 			{
 				// Print a message indicating that a user has started a new activity
 				if(Convert.ToString(activity.Type) == "Playing")
 				{
-					//User user = new User(user.GlobalName, DateTime.Now, );
-
-					Console.WriteLine($"someone is playing {activity}");
-				}
+					User localUser = new User(Convert.ToString(user), Convert.ToString(activity));
+					if (users.Any(e => e.userName ==  localUser.userName && e.game == localUser.game))
+					{
+						int index = users.FindIndex(u => u.userName == localUser.userName && u.game == localUser.game);
+						Console.WriteLine(DateTime.Now.Subtract(users[index].date));
+						users.RemoveAt(index);
+					}
+				};
 			}
 		}
 
@@ -73,31 +79,25 @@ public class Program
 				// Print a message indicating that a user has started a new activity
 				if(Convert.ToString(activity.Type) == "Playing")
 				{
-					User localUser = new User(Convert.ToString(user), DateTime.Now, Convert.ToString(activity));
-					Console.WriteLine($"someone is playing {activity}");
+					User localUser = new User(Convert.ToString(user), Convert.ToString(activity));
+					users.Add(localUser);
 				}
 			}
 		}
-	}
-
-	private static async Task AddCommand()
-	{
-		Console.WriteLine("saba");
 	}
 }
 
 
 public class User
 {
-	private string userName {get; }
-	private DateTime date {get; }
-	private string game {get; }
+	public string userName {get; }
+	public DateTime date {get; }
+	public string game {get; }
 
-	public User(string UserName, DateTime Date, string Game)
+	public User(string UserName, string Game)
 	{
 		userName = UserName;
-		Date = date;
+		date = DateTime.Now;
 		Game = game;
-		Console.WriteLine("user created");
 	}
 }
