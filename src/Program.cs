@@ -51,37 +51,43 @@ public class Program
 
 	// This method is called when a user's activity or status changes (presence update)
  private static async Task PrintActivity(SocketUser user, SocketPresence oldPresence, SocketPresence newPresence)
-	{
-		Console.WriteLine("saba");
+	{	
+		//variable to check if we should do if statement little down below
+		bool shouldDo = false;
+		string gameName = "";
 
-		if(oldPresence.Activities.Any() && !newPresence.Activities.Any())
+
+		//just checks if user closed game and i am doing == Playing couse activity could also be listening to spotify
+		if(
+			oldPresence.Activities.Count(e => Convert.ToString(e.Type) == "Playing") > newPresence.Activities.Count(e => Convert.ToString(e.Type) == "Playing")
+		)
 		{
-			foreach(var activity in oldPresence.Activities)
+			gameName = Convert.ToString(oldPresence.Activities.Last().Name);	
+			shouldDo = true;
+		}
+
+		//this is basically handler to closing game
+		if(oldPresence.Activities.Any()  && shouldDo == true)
+ 		{
+			//we create User object here and also get time game was open
+			Console.WriteLine(gameName);
+			User localUser = new User(Convert.ToString(user), Convert.ToString(gameName));
+			if (users.Any(e => e.userName ==  localUser.userName && e.game == localUser.game))
 			{
-				// Print a message indicating that a user has started a new activity
-				if(Convert.ToString(activity.Type) == "Playing")
-				{
-					User localUser = new User(Convert.ToString(user), Convert.ToString(activity));
-					if (users.Any(e => e.userName ==  localUser.userName && e.game == localUser.game))
-					{
-						int index = users.FindIndex(u => u.userName == localUser.userName && u.game == localUser.game);
-						Console.WriteLine(DateTime.Now.Subtract(users[index].date));
-						users.RemoveAt(index);
-					}
-				};
+				int index = users.FindIndex(u => u.userName == localUser.userName && u.game == localUser.game);
+				Console.WriteLine(DateTime.Now.Subtract(users[index].date));
+				users.RemoveAt(index);
 			}
 		}
 
-		if(user.Activities.Any())
+		if(shouldDo == false && user.Activities.Any(e => Convert.ToString(e.Type) == "Playing"))
 		{
-			foreach(var activity in user.Activities)
+			User localUser = new User(Convert.ToString(user), Convert.ToString(user.Activities.Last().Name));
+			Console.WriteLine(localUser.game);
+			if(!users.Any(e => e.userName == localUser.userName && e.game == localUser.game))
 			{
-				// Print a message indicating that a user has started a new activity
-				if(Convert.ToString(activity.Type) == "Playing")
-				{
-					User localUser = new User(Convert.ToString(user), Convert.ToString(activity));
-					users.Add(localUser);
-				}
+				users.Add(localUser);
+				Console.WriteLine("game added");
 			}
 		}
 	}
