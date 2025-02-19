@@ -62,7 +62,14 @@ public class Program
 			oldPresence.Activities.Count(e => Convert.ToString(e.Type) == "Playing") > newPresence.Activities.Count(e => Convert.ToString(e.Type) == "Playing")
 		)
 		{
-			gameName = Convert.ToString(oldPresence.Activities.Last().Name);	
+			foreach(var game in oldPresence.Activities)
+			{
+				if(!newPresence.Activities.Contains(game))
+				{
+					gameName = game.Name;
+					break;
+				}
+			}
 			shouldDo = true;
 		}
 
@@ -70,10 +77,10 @@ public class Program
 		if(oldPresence.Activities.Any()  && shouldDo == true)
  		{
 			//we create User object here and also get time game was open
-			Console.WriteLine(gameName);
-			User localUser = new User(Convert.ToString(user), Convert.ToString(gameName));
+			User localUser = new User(Convert.ToString(user), Convert.ToString(gameName));	
 			if (users.Any(e => e.userName ==  localUser.userName && e.game == localUser.game))
-			{
+			{	
+				Console.WriteLine(gameName);
 				int index = users.FindIndex(u => u.userName == localUser.userName && u.game == localUser.game);
 				Console.WriteLine(DateTime.Now.Subtract(users[index].date));
 				users.RemoveAt(index);
@@ -81,9 +88,9 @@ public class Program
 		}
 
 		if(shouldDo == false && user.Activities.Any(e => Convert.ToString(e.Type) == "Playing"))
-		{
-			User localUser = new User(Convert.ToString(user), Convert.ToString(user.Activities.Last().Name));
-			Console.WriteLine(localUser.game);
+		{	
+			string newGame = Convert.ToString(newPresence.Activities.First().Name);
+			User localUser = new User(Convert.ToString(user), newGame);
 			if(!users.Any(e => e.userName == localUser.userName && e.game == localUser.game))
 			{
 				users.Add(localUser);
@@ -104,6 +111,6 @@ public class User
 	{
 		userName = UserName;
 		date = DateTime.Now;
-		Game = game;
+		game = Game;
 	}
 }
