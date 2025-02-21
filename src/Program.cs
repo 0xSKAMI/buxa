@@ -50,49 +50,51 @@ public class Program
 	}
 
 	// This method is called when a user's activity or status changes (presence update)
-	private static async Task PrintActivity(SocketUser user, SocketPresence oldPresence, SocketPresence newPresence)
-	{
-		// Variable to check if we should do the if statement below
+ private static async Task PrintActivity(SocketUser user, SocketPresence oldPresence, SocketPresence newPresence)
+	{	
+		//variable to check if we should do if statement little down below
 		bool shouldDo = false;
 		string gameName = "";
 
-		// Checks if the user closed a game (activity type "Playing")
-		if (oldPresence.Activities.Count(e => Convert.ToString(e.Type) == "Playing") > newPresence.Activities.Count(e => Convert.ToString(e.Type) == "Playing"))
+
+		//just checks if user closed game and i am doing == Playing couse activity could also be listening to spotify
+		if(
+			oldPresence.Activities.Count(e => Convert.ToString(e.Type) == "Playing") > newPresence.Activities.Count(e => Convert.ToString(e.Type) == "Playing")
+		)
 		{
-			foreach (var game in oldPresence.Activities)
+			foreach(var game in oldPresence.Activities)
 			{
-				if (!newPresence.Activities.Any(e => Convert.ToString(e.Name) == Convert.ToString(game.Name)))
+				if(!newPresence.Activities.Contains(game))
 				{
 					gameName = game.Name;
-					shouldDo = true;
 					break;
 				}
 			}
+			shouldDo = true;
 		}
 
-		// Handler for closing a game
-		if (oldPresence.Activities.Any() && shouldDo == true)
-		{
-			// Create a User object and get the time the game was open
-			User localUser = new User(Convert.ToString(user), Convert.ToString(gameName));
-
-			if (users.Any(e => e.userName == localUser.userName && e.game == localUser.game))
-			{
-				Console.WriteLine("Disconnected from: " + gameName);
+		//this is basically handler to closing game
+		if(oldPresence.Activities.Any()  && shouldDo == true)
+ 		{
+			//we create User object here and also get time game was open
+			User localUser = new User(Convert.ToString(user), Convert.ToString(gameName));	
+			if (users.Any(e => e.userName ==  localUser.userName && e.game == localUser.game))
+			{	
+				Console.WriteLine(gameName);
 				int index = users.FindIndex(u => u.userName == localUser.userName && u.game == localUser.game);
 				Console.WriteLine(DateTime.Now.Subtract(users[index].date));
 				users.RemoveAt(index);
 			}
 		}
 
-		if (shouldDo == false && user.Activities.Any(e => Convert.ToString(e.Type) == "Playing"))
-		{
+		if(shouldDo == false && user.Activities.Any(e => Convert.ToString(e.Type) == "Playing"))
+		{	
 			string newGame = Convert.ToString(newPresence.Activities.First().Name);
 			User localUser = new User(Convert.ToString(user), newGame);
-
-			if (!users.Any(e => e.userName == localUser.userName && e.game == localUser.game))
+			if(!users.Any(e => e.userName == localUser.userName && e.game == localUser.game))
 			{
 				users.Add(localUser);
+				Console.WriteLine("game added");
 			}
 		}
 	}
