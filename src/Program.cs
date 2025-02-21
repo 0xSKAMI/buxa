@@ -7,7 +7,9 @@ using Discord.Commands;
 using Microsoft.Win32.SafeHandles; // For command handling (though not used here)
 
 public class Program
-{
+{	
+	public static List<User> users = new List<User>();
+
 	// Main entry point of the application
 	private static async Task Main(string[] args)
 	{
@@ -27,8 +29,6 @@ public class Program
 		string token = Env.GetString("TOKEN");
 
 		// Subscribe to events that the bot should listen to
-		_client.Ready += AddCommand;
-		_client.MessageReceived += PrintMessage; // Event triggered when a message is received
 		_client.PresenceUpdated += PrintActivity; // Event triggered when a user's presence changes (activity, status, etc.)
 		_client.Log += LogMessage; // Event triggered for logging messages from the bot
 
@@ -38,16 +38,6 @@ public class Program
 
 		// Keep the bot running indefinitely
 		await Task.Delay(-1);
-	}
-
-	// This method is called whenever a message is received
-	private static async Task PrintMessage(SocketMessage message)
-	{
-		// Print the channel in which the message was received
-		if((Convert.ToString(message.Author) == "j_e_b_o_n_e." || Convert.ToString(message.Author) == "shavleg") && Convert.ToString(message.Content) == "watermelon" )
-		{
-			await message.Channel.SendMessageAsync("niggers");
-		}
 	}
 
 	// This method is called whenever a new log message is generated (for debugging or logging purposes)
@@ -62,52 +52,63 @@ public class Program
 	// This method is called when a user's activity or status changes (presence update)
 	private static async Task PrintActivity(SocketUser user, SocketPresence oldPresence, SocketPresence newPresence)
 	{
-		if(oldPresence.Activities.Any())
-		{
-			foreach(var activity in user.Activities)
-			{
-				// Print a message indicating that a user has started a new activity
-				if(Convert.ToString(activity.Type) == "Playing")
-				{
-					//User user = new User(user.GlobalName, DateTime.Now, );
+		// Variable to check if we should do the if statement below
+		bool shouldDo = false;
+		string gameName = "";
 
-					Console.WriteLine($"someone is playing {activity}");
+		// Checks if the user closed a game (activity type "Playing")
+		if (oldPresence.Activities.Count(e => Convert.ToString(e.Type) == "Playing") > newPresence.Activities.Count(e => Convert.ToString(e.Type) == "Playing"))
+		{
+			foreach (var game in oldPresence.Activities)
+			{
+				if (!newPresence.Activities.Any(e => Convert.ToString(e.Name) == Convert.ToString(game.Name)))
+				{
+					gameName = game.Name;
+					shouldDo = true;
+					break;
 				}
 			}
 		}
 
-		if(user.Activities.Any())
+		// Handler for closing a game
+		if (oldPresence.Activities.Any() && shouldDo == true)
 		{
-			foreach(var activity in user.Activities)
+			// Create a User object and get the time the game was open
+			User localUser = new User(Convert.ToString(user), Convert.ToString(gameName));
+
+			if (users.Any(e => e.userName == localUser.userName && e.game == localUser.game))
 			{
-				// Print a message indicating that a user has started a new activity
-				if(Convert.ToString(activity.Type) == "Playing")
-				{
-					User localUser = new User(Convert.ToString(user), DateTime.Now, Convert.ToString(activity));
-					Console.WriteLine($"someone is playing {activity}");
-				}
+				Console.WriteLine("Disconnected from: " + gameName);
+				int index = users.FindIndex(u => u.userName == localUser.userName && u.game == localUser.game);
+				Console.WriteLine(DateTime.Now.Subtract(users[index].date));
+				users.RemoveAt(index);
 			}
 		}
-	}
 
-	private static async Task AddCommand()
-	{
-		Console.WriteLine("saba");
+		if (shouldDo == false && user.Activities.Any(e => Convert.ToString(e.Type) == "Playing"))
+		{
+			string newGame = Convert.ToString(newPresence.Activities.First().Name);
+			User localUser = new User(Convert.ToString(user), newGame);
+
+			if (!users.Any(e => e.userName == localUser.userName && e.game == localUser.game))
+			{
+				users.Add(localUser);
+			}
+		}
 	}
 }
 
 
 public class User
 {
-	private string userName {get; }
-	private DateTime date {get; }
-	private string game {get; }
+	public string userName {get; }
+	public DateTime date {get; }
+	public string game {get; }
 
-	public User(string UserName, DateTime Date, string Game)
+	public User(string UserName, string Game)
 	{
 		userName = UserName;
-		Date = date;
-		Game = game;
-		Console.WriteLine("user created");
+		date = DateTime.Now;
+		game = Game;
 	}
 }
