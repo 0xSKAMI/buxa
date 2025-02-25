@@ -5,6 +5,7 @@ using System; // Basic system functionalities like Console output
 using System.Threading.Tasks; // For asynchronous programming
 using Discord.Commands;
 using Microsoft.Win32.SafeHandles; // For command handling (though not used here)
+using Database;
 
 public class Program
 {	
@@ -15,6 +16,8 @@ public class Program
 	{
 		// Load environment variables from .env file (such as the bot token)
 		Env.Load();
+		DB something = new DB();
+		something.ConnectDB();
 
 		// Configure the bot client with necessary intents to track guilds, members, and presence updates
 		var socketConfig = new DiscordSocketConfig
