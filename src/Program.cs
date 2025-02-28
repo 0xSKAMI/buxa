@@ -17,7 +17,7 @@ public class Program
 		// Load environment variables from .env file (such as the bot token)
 		Env.Load();
 		DB something = new DB();
-		something.ConnectDB();
+		something.FindPlayer("saba");
 
 		// Configure the bot client with necessary intents to track guilds, members, and presence updates
 		var socketConfig = new DiscordSocketConfig
@@ -54,7 +54,7 @@ public class Program
 
 	// This method is called when a user's activity or status changes (presence update)
  private static async Task PrintActivity(SocketUser user, SocketPresence oldPresence, SocketPresence newPresence)
-	{	
+	{
 		//variable to check if we should do if statement little down below
 		bool shouldDo = false;
 		string gameName = "";
