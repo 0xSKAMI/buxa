@@ -7,17 +7,15 @@ using Discord.Commands;
 using Microsoft.Win32.SafeHandles; // For command handling (though not used here)
 using Database;
 
-public class Program
-{	
+public class Prgram
+{   
 	public static List<User> users = new List<User>();
+	public static DB dataBase = new DB();
 
 	// Main entry point of the application
 	private static async Task Main(string[] args)
-	{
-		// Load environment variables from .env file (such as the bot token)
+	{	
 		Env.Load();
-		DB something = new DB();
-		something.FindPlayer("saba");
 
 		// Configure the bot client with necessary intents to track guilds, members, and presence updates
 		var socketConfig = new DiscordSocketConfig
@@ -86,6 +84,7 @@ public class Program
 				Console.WriteLine(gameName);
 				int index = users.FindIndex(u => u.userName == localUser.userName && u.game == localUser.game);
 				Console.WriteLine(DateTime.Now.Subtract(users[index].date));
+				dataBase.AddPlayerGame(1, "saba", DateTime.Now.Subtract(users[index].date));
 				users.RemoveAt(index);
 			}
 		}

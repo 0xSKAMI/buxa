@@ -4,3 +4,4 @@ obj
 Folder.DotSettings.user
 3
 .idea
+*.sw*

@@ -1,5 +1,5 @@
-using DotNetEnv;
-using Npgsql;
+	using DotNetEnv;
+	using Npgsql;
 
 // here is code for the database
 namespace Database
@@ -55,44 +55,59 @@ namespace Database
 		
 		}
 
-		public async Task AddPlayerGame()
+		public async Task AddPlayerGame(int gameId, string playerId, TimeSpan date)
 		{
 			await globalConn.OpenAsync();
-
+		
 			using var cmd = new NpgsqlCommand();
-			cmd.CommandText = "SELECT * FROM Games";
+			cmd.CommandText = "INSERT INTO PlayerGames(GameId, PlayerId, played_time) VALUES(@gid, @pid, @date)";
+			cmd.Parameters.AddWithValue("gid", gameId);
+			cmd.Parameters.AddWithValue("pid", playerId);
+			cmd.Parameters.AddWithValue("date", date);
 			cmd.Connection = globalConn;
 	
-			using var result = await cmd.ExecuteReaderAsync();
-
-
-			while(await result.ReadAsync())
-			{
-				Console.WriteLine(result.GetString(1));
-			}
+			await cmd.ExecuteNonQueryAsync();
 
 			await CloseDb();
-		}
+		 }
 
 		public async Task FindPlayer(string playerId)
 		{
 			await globalConn.OpenAsync();
 
 			using var cmd = new NpgsqlCommand();
-			cmd.CommandText = "SELECT * FROM Players";
+			cmd.CommandText = $"SELECT * FROM Players WHERE PlayerId = @id";
 			cmd.Parameters.AddWithValue("id", playerId);
 			cmd.Connection = globalConn;
 			
 			using var result = await cmd.ExecuteReaderAsync();
+		 
+			Console.WriteLine(result.HasRows);
+
+			await CloseDb();
+		}
+
+		public async Task FindGame(string gameName)
+		{
+			await globalConn.OpenAsync();
+
+			using var cmd = new NpgsqlCommand();
+			cmd.CommandText = $"SELECT * FROM Games WHERE name = @name";
+			cmd.Parameters.AddWithValue("name", gameName);
+			cmd.Connection = globalConn;
+			
+			using var result = await cmd.ExecuteReaderAsync();
+		 
+			Console.WriteLine(result.HasRows);
 
 			while(await result.ReadAsync())
 			{
 				Console.WriteLine(result.GetString(1));
 			}
-			
-			await CloseDb();
+
+			await CloseDb();	
 		}
-	
+
 		//this method is used for closing connection with db (database)
 		private static async Task CloseDb()
 		{
