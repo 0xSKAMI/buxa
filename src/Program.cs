@@ -11,6 +11,7 @@ public class Prgram
 {   
 	public static List<User> users = new List<User>();
 	public static DB dataBase = new DB();
+	public static DiscordSocketClient globalClient;
 
 	// Main entry point of the application
 	private static async Task Main(string[] args)
@@ -32,10 +33,13 @@ public class Prgram
 		// Subscribe to events that the bot should listen to
 		_client.PresenceUpdated += PrintActivity; // Event triggered when a user's presence changes (activity, status, etc.)
 		_client.Log += LogMessage; // Event triggered for logging messages from the bot
+		_client.Ready += CreateCommand;
+		_client.SlashCommandExecuted += CommandHandler;
 
 		// Log in the bot with the token a:wnd start the connection
 		await _client.LoginAsync(TokenType.Bot, token);
 		await _client.StartAsync();
+		globalClient = _client; 
 
 		// Keep the bot running indefinitely
 		await Task.Delay(-1);
@@ -50,8 +54,21 @@ public class Prgram
 		await Task.CompletedTask;
 	}
 
+	public static async Task CreateCommand()
+	{
+		SlashCommandBuilder testCommand = new SlashCommandBuilder();
+		testCommand.WithName("first-commanmd");
+		testCommand.WithDescription("does nothing");
+		await globalClient.CreateGlobalApplicationCommandAsync(testCommand.Build());
+	}
+
+	public static async Task CommandHandler(SocketSlashCommand command)
+	{
+		await command.RespondAsync("yooo");	
+	}
+
 	// This method is called when a user's activity or status changes (presence update)
- private static async Task PrintActivity(SocketUser user, SocketPresence oldPresence, SocketPresence newPresence)
+	private static async Task PrintActivity(SocketUser user, SocketPresence oldPresence, SocketPresence newPresence)
 	{
 		//variable to check if we should do if statement little down below
 		bool shouldDo = false;
