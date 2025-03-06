@@ -11,7 +11,7 @@ public class Prgram
 {   
 	public static List<User> users = new List<User>();
 	public static DB dataBase = new DB();
-	public static DiscordSocketClient globalClient;
+	public static DiscordSocketClient _client;
 
 	// Main entry point of the application
 	private static async Task Main(string[] args)
@@ -25,7 +25,7 @@ public class Prgram
 		};
 
 		// Initialize the Discord socket client with the configuration
-		var _client = new DiscordSocketClient(socketConfig);
+		_client = new DiscordSocketClient(socketConfig);
 
 		// Retrieve the bot token from the environment variables
 		string token = Env.GetString("TOKEN");
@@ -39,7 +39,6 @@ public class Prgram
 		// Log in the bot with the token a:wnd start the connection
 		await _client.LoginAsync(TokenType.Bot, token);
 		await _client.StartAsync();
-		globalClient = _client; 
 
 		// Keep the bot running indefinitely
 		await Task.Delay(-1);
@@ -59,7 +58,7 @@ public class Prgram
 		SlashCommandBuilder testCommand = new SlashCommandBuilder();
 		testCommand.WithName("first-commanmd");
 		testCommand.WithDescription("does nothing");
-		await globalClient.CreateGlobalApplicationCommandAsync(testCommand.Build());
+		await _client.CreateGlobalApplicationCommandAsync(testCommand.Build());
 	}
 
 	public static async Task CommandHandler(SocketSlashCommand command)
