@@ -3,6 +3,7 @@ using Discord.WebSocket; // Provides the WebSocket-based client
 using DotNetEnv; // To load environment variables from a `.env` file
 using System; // Basic system functionalities like Console output
 using System.Threading.Tasks; // For asynchronous programming
+using System.Threading;
 using Discord.Commands;
 using Microsoft.Win32.SafeHandles; // For command handling (though not used here)
 using Database;
@@ -12,6 +13,7 @@ public class Prgram
 	public static List<User> users = new List<User>();
 	public static DB dataBase = new DB();
 	public static DiscordSocketClient _client;
+	public static int ThreadCount = 0;
 
 	// Main entry point of the application
 	private static async Task Main(string[] args)
@@ -31,7 +33,7 @@ public class Prgram
 		string token = Env.GetString("TOKEN");
 
 		// Subscribe to events that the bot should listen to
-		_client.PresenceUpdated += PrintActivity; // Event triggered when a user's presence changes (activity, status, etc.)
+		_client.PresenceUpdated += ThreadManager; // Event triggered when a user's presence changes (activity, status, etc.)
 		_client.Log += LogMessage; // Event triggered for logging messages from the bot
 		_client.Ready += CreateCommand;
 		_client.SlashCommandExecuted += CommandHandler;
@@ -65,14 +67,25 @@ public class Prgram
 	{
 		await command.RespondAsync("yooo");	
 	}
+	
+	//Managing Threads for activity
+	private static async Task ThreadManager(SocketUser user, SocketPresence oldPresence, SocketPresence newPresence)
+	{
+		Thread test = new Thread(() => ActivityHandler(user, oldPresence, newPresence))
+		{
+			Name = Convert.ToString(ThreadCount)
+		};
+		ThreadCount++;
+		Console.WriteLine("something in threads");
+		test.Start();
+	}
 
 	// This method is called when a user's activity or status changes (presence update)
-	private static async Task PrintActivity(SocketUser user, SocketPresence oldPresence, SocketPresence newPresence)
+	private static async Task ActivityHandler(SocketUser user, SocketPresence oldPresence, SocketPresence newPresence)
 	{
 		//variable to check if we should do if statement little down below
 		bool shouldDo = false;
 		string gameName = "";
-
 
 		//just checks if user closed game and i am doing == Playing couse activity could also be listening to spotify
 		if(
@@ -91,8 +104,8 @@ public class Prgram
 		}
 
 		//this is basically handler to closing game
-		if(oldPresence.Activities.Any()  && shouldDo == true)
- 		{
+		if(oldPresence.Activities.Any() && shouldDo == true)
+		{
 			//we create User object here and also get time game was open
 			User localUser = new User(Convert.ToString(user), Convert.ToString(gameName));	
 			if (users.Any(e => e.userName ==  localUser.userName && e.game == localUser.game))
@@ -114,6 +127,11 @@ public class Prgram
 				users.Add(localUser);
 				Console.WriteLine("game added");
 			}
+		}
+
+		foreach(var name in users)
+		{
+			Console.WriteLine(name.game);
 		}
 	}
 }
