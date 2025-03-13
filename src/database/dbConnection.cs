@@ -23,7 +23,8 @@ namespace Database
 			//giving globalConn value of connection
 			globalConn = new NpgsqlConnection(connString);
 		}
-
+		
+		//This method adds player to DB (players are unique)	
 		public async Task AddPlayer(string playerId)
 		{
 			await globalConn.OpenAsync();
@@ -33,12 +34,12 @@ namespace Database
 			cmd.Parameters.AddWithValue("Id", playerId);
 			cmd.Connection = globalConn;
 
-
 			await cmd.ExecuteNonQueryAsync();
 
-			await CloseDb();
+			await globalConn.CloseAsync();
 		}
 
+		//This method adds Games to DB (games are unique)
 		public async Task AddGame(string gameName)
 		{
 			await globalConn.OpenAsync();
@@ -51,11 +52,11 @@ namespace Database
 
 			await cmd.ExecuteNonQueryAsync();
 
-			await CloseDb();
-		
+			await globalConn.CloseAsync();
 		}
 
-		public async Task AddPlayerGame(int gameId, string playerId, TimeSpan date)
+		//This method adds Playergames to DB
+		public async Task AddPlayerGame(int gameId, string playerId, TimeSpan time)
 		{
 			await globalConn.OpenAsync();
 		
@@ -63,49 +64,56 @@ namespace Database
 			cmd.CommandText = "INSERT INTO PlayerGames(GameId, PlayerId, played_time) VALUES(@gid, @pid, @date)";
 			cmd.Parameters.AddWithValue("gid", gameId);
 			cmd.Parameters.AddWithValue("pid", playerId);
-			cmd.Parameters.AddWithValue("date", date);
+			cmd.Parameters.AddWithValue("time", time);
 			cmd.Connection = globalConn;
 	
 			await cmd.ExecuteNonQueryAsync();
 
-			await CloseDb();
+			await globalConn.CloseAsync();
 		 }
 
-		public async Task FindPlayer(string playerId)
+		//Returs bool based on existanse of player
+		public async Task<bool> FindPlayer(string playerId)
 		{
 			await globalConn.OpenAsync();
 
-			using var cmd = new NpgsqlCommand();
-			cmd.CommandText = $"SELECT * FROM Players WHERE PlayerId = @id";
-			cmd.Parameters.AddWithValue("id", playerId);
-			cmd.Connection = globalConn;
-			
-			using var result = await cmd.ExecuteReaderAsync();
-		 
-			Console.WriteLine(result.HasRows);
+			try
+			{
+				using var cmd = new NpgsqlCommand();
+				cmd.CommandText = $"SELECT * FROM Players WHERE PlayerId = @id";
+				cmd.Parameters.AddWithValue("id", playerId);
+				cmd.Connection = globalConn;
+				
+				using var result = await cmd.ExecuteReaderAsync();
 
-			await CloseDb();
+				return result.HasRows;
+			}
+			finally
+			{
+				await globalConn.CloseAsync();
+			}
 		}
 
-		public async Task FindGame(string gameName)
+		//
+		public async Task<bool> FindGame(string gameName)
 		{
 			await globalConn.OpenAsync();
-
-			using var cmd = new NpgsqlCommand();
-			cmd.CommandText = $"SELECT * FROM Games WHERE name = @name";
-			cmd.Parameters.AddWithValue("name", gameName);
-			cmd.Connection = globalConn;
 			
-			using var result = await cmd.ExecuteReaderAsync();
-		 
-			Console.WriteLine(result.HasRows);
-
-			while(await result.ReadAsync())
+			try
 			{
-				Console.WriteLine(result.GetString(1));
+				using var cmd = new NpgsqlCommand();
+				cmd.CommandText = $"SELECT * FROM Games WHERE name = @name";
+				cmd.Parameters.AddWithValue("name", gameName);
+				cmd.Connection = globalConn;
+			
+				using var result = await cmd.ExecuteReaderAsync();
+		 
+				return result.HasRows;
 			}
-
-			await CloseDb();	
+			finally
+			{
+				await globalConn.CloseAsync();
+			}
 		}
 
 		//this method is used for closing connection with db (database)

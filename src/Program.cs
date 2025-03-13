@@ -8,7 +8,7 @@ using Discord.Commands;
 using Microsoft.Win32.SafeHandles; // For command handling (though not used here)
 using Database;
 
-public class Prgram
+public class Program
 {   
 	public static List<User> users = new List<User>();
 	public static DB dataBase = new DB();
@@ -18,8 +18,8 @@ public class Prgram
 	// Main entry point of the application
 	private static async Task Main(string[] args)
 	{	
+		//dataBase.AddPlayer("saba");
 		Env.Load();
-
 		// Configure the bot client with necessary intents to track guilds, members, and presence updates
 		var socketConfig = new DiscordSocketConfig
 		{ 		 
@@ -79,12 +79,11 @@ public class Prgram
 		test.Start();
 	}
 
-	// This method is called when a user's activity or status changes (presence update)
+	//This method is called when a user's activity or status changes (presence update)
 	private static async Task ActivityHandler(SocketUser user, SocketPresence oldPresence, SocketPresence newPresence)
 	{
 		var oldPresenceVar = oldPresence.Activities.Where(e => Convert.ToString(e.Type) == "Playing");
 		var newPresenceVar = newPresence.Activities.Where(e => Convert.ToString(e.Type) == "Playing");
-
 
 		//variable to check if we should do if statement little down below
 		bool shouldDo = false;
@@ -103,6 +102,18 @@ public class Prgram
 					break;
 				}
 			}
+
+			if(await dataBase.FindPlayer(Convert.ToString(user.AvatarId)) == false)
+			{
+				dataBase.AddPlayer(Convert.ToString(user.AvatarId));
+			}
+
+			if(await dataBase.FindGame(gameName) == false && await dataBase.FindPlayer(Convert.ToString(user.AvatarId)) == true && gameName != "")
+			{
+				Console.WriteLine("sabga");
+				dataBase.AddGame(gameName);
+			}
+
 			shouldDo = true;
 		}
 
