@@ -110,7 +110,6 @@ public class Program
 
 			if(await dataBase.FindGame(gameName) == false && await dataBase.FindPlayer(Convert.ToString(user.AvatarId)) == true && gameName != "")
 			{
-				Console.WriteLine("sabga");
 				dataBase.AddGame(gameName);
 			}
 
@@ -127,6 +126,8 @@ public class Program
 			{	
 				int index = users.FindIndex(u => u.userName == localUser.userName && u.game == localUser.game);
 				Console.WriteLine(DateTime.Now.Subtract(users[index].date));
+				dataBase.AddPlayerGame(await dataBase.FindGameId(gameName), user.AvatarId, DateTime.Now.Subtract(users[index].date));
+
 				users.RemoveAt(index);
 			}
 		}

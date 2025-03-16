@@ -29,14 +29,19 @@ namespace Database
 		{
 			await globalConn.OpenAsync();
 
-			using var cmd = new NpgsqlCommand();
-			cmd.CommandText = $"INSERT INTO Players(PlayerId) VALUES(@Id)";
-			cmd.Parameters.AddWithValue("Id", playerId);
-			cmd.Connection = globalConn;
+			try
+			{
+				using var cmd = new NpgsqlCommand();
+				cmd.CommandText = "INSERT INTO Players(PlayerId) VALUES(@Id)";
+				cmd.Parameters.AddWithValue("Id", playerId);
+				cmd.Connection = globalConn;
 
-			await cmd.ExecuteNonQueryAsync();
-
-			await globalConn.CloseAsync();
+				await cmd.ExecuteNonQueryAsync();
+			}
+			finally
+			{
+				await globalConn.CloseAsync();
+			}
 		}
 
 		//This method adds Games to DB (games are unique)
@@ -44,15 +49,19 @@ namespace Database
 		{
 			await globalConn.OpenAsync();
 
-			using var cmd = new NpgsqlCommand();
-			cmd.CommandText = $"INSERT INTO Games(Name) VALUES(@name)";
-			cmd.Parameters.AddWithValue("name", gameName);
-			cmd.Connection = globalConn;
+			try
+			{
+				using var cmd = new NpgsqlCommand();
+				cmd.CommandText = "INSERT INTO Games(Name) VALUES(@name)";
+				cmd.Parameters.AddWithValue("name", gameName);
+				cmd.Connection = globalConn;
 
-
-			await cmd.ExecuteNonQueryAsync();
-
-			await globalConn.CloseAsync();
+				await cmd.ExecuteNonQueryAsync();
+			}
+			finally
+			{
+				await globalConn.CloseAsync();
+			}
 		}
 
 		//This method adds Playergames to DB
@@ -60,16 +69,23 @@ namespace Database
 		{
 			await globalConn.OpenAsync();
 		
-			using var cmd = new NpgsqlCommand();
-			cmd.CommandText = "INSERT INTO PlayerGames(GameId, PlayerId, played_time) VALUES(@gid, @pid, @date)";
-			cmd.Parameters.AddWithValue("gid", gameId);
-			cmd.Parameters.AddWithValue("pid", playerId);
-			cmd.Parameters.AddWithValue("time", time);
-			cmd.Connection = globalConn;
+			try
+			{
+				using var cmd = new NpgsqlCommand();
+				cmd.CommandText = "INSERT INTO PlayerGames(gameid, playerid, played_time) VALUES(@gid, @pid, @date)";
+				cmd.Parameters.AddWithValue("gid", gameId);
+				cmd.Parameters.AddWithValue("pid", playerId);
+				cmd.Parameters.AddWithValue("time", time);
+				cmd.Connection = globalConn;
 	
-			await cmd.ExecuteNonQueryAsync();
+				await cmd.ExecuteNonQueryAsync();
+				Console.WriteLine("saba");
+			}
+			finally
+			{
+				await globalConn.CloseAsync();
+			}
 
-			await globalConn.CloseAsync();
 		 }
 
 		//Returs bool based on existanse of player
@@ -80,7 +96,7 @@ namespace Database
 			try
 			{
 				using var cmd = new NpgsqlCommand();
-				cmd.CommandText = $"SELECT * FROM Players WHERE PlayerId = @id";
+				cmd.CommandText = "SELECT * FROM Players WHERE PlayerId = @id";
 				cmd.Parameters.AddWithValue("id", playerId);
 				cmd.Connection = globalConn;
 				
@@ -94,7 +110,7 @@ namespace Database
 			}
 		}
 
-		//
+		//This is method for finding if game exists or not
 		public async Task<bool> FindGame(string gameName)
 		{
 			await globalConn.OpenAsync();
@@ -102,7 +118,7 @@ namespace Database
 			try
 			{
 				using var cmd = new NpgsqlCommand();
-				cmd.CommandText = $"SELECT * FROM Games WHERE name = @name";
+				cmd.CommandText = "SELECT * FROM Games WHERE name = @name";
 				cmd.Parameters.AddWithValue("name", gameName);
 				cmd.Connection = globalConn;
 			
@@ -116,12 +132,33 @@ namespace Database
 			}
 		}
 
-		//this method is used for closing connection with db (database)
-		private static async Task CloseDb()
+		public async Task<int> FindGameId(string gameName)
 		{
-			DB Database = new DB();
+			await globalConn.OpenAsync();
 
-			await Database.globalConn.CloseAsync();
+			try
+			{
+				using var cmd = new NpgsqlCommand();
+				cmd.CommandText = "SELECT GameId FROM Games WHERE name = @game";
+				cmd.Parameters.AddWithValue("game", gameName);
+				cmd.Connection = globalConn;
+
+				using var result = await cmd.ExecuteReaderAsync();
+
+				if(result.HasRows)
+				{
+					await result.ReadAsync();
+					return Convert.ToInt32(result.GetInt32(0));
+				}
+				else
+				{
+					return -1;
+				}
+			}
+			finally
+			{
+				await globalConn.CloseAsync();
+			}
 		}
 	}
 }
