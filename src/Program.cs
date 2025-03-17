@@ -1,4 +1,4 @@
-﻿using Discord; // Discord API for bot interaction
+﻿using Discord; // Discord API for bot in:eraction
 using Discord.WebSocket; // Provides the WebSocket-based client
 using DotNetEnv; // To load environment variables from a `.env` file
 using System; // Basic system functionalities like Console output

@@ -72,14 +72,16 @@ namespace Database
 			try
 			{
 				using var cmd = new NpgsqlCommand();
-				cmd.CommandText = "INSERT INTO PlayerGames(gameid, playerid, played_time) VALUES(@gid, @pid, @date)";
+				cmd.CommandText = "INSERT INTO PlayerGames(gameid, playerid, played_time) VALUES(@gid, @pid, @time)";
 				cmd.Parameters.AddWithValue("gid", gameId);
 				cmd.Parameters.AddWithValue("pid", playerId);
 				cmd.Parameters.AddWithValue("time", time);
 				cmd.Connection = globalConn;
-	
+				
+				Console.WriteLine(gameId);
+				Console.WriteLine(playerId);
+				Console.WriteLine(time);
 				await cmd.ExecuteNonQueryAsync();
-				Console.WriteLine("saba");
 			}
 			finally
 			{
