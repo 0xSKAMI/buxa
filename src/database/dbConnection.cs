@@ -78,9 +78,6 @@ namespace Database
 				cmd.Parameters.AddWithValue("time", time);
 				cmd.Connection = globalConn;
 				
-				Console.WriteLine(gameId);
-				Console.WriteLine(playerId);
-				Console.WriteLine(time);
 				await cmd.ExecuteNonQueryAsync();
 			}
 			finally
@@ -88,7 +85,30 @@ namespace Database
 				await globalConn.CloseAsync();
 			}
 
-		 }
+		}
+
+		public async Task FindMostPlayedGameWeek()
+		{
+			await globalConn.OpenAsync();
+
+			try
+			{
+				using var cmd = new NpgsqlCommand();
+				cmd.CommandText = "SELECT playerId FROM PlayerGames WHERE creation_date >= NOW() - INTERVAL '7 days'";
+				cmd.Connection = globalConn;
+
+				using var result = await cmd.ExecuteReaderAsync();
+				
+				while(await result.ReadAsync())
+				{
+					Console.WriteLine(result.GetString(0));
+				}
+			}
+			finally
+			{
+				await globalConn.CloseAsync();
+			}
+		}
 
 		//Returs bool based on existanse of player
 		public async Task<bool> FindPlayer(string playerId)

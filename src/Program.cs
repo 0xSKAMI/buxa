@@ -18,7 +18,6 @@ public class Program
 	// Main entry point of the application
 	private static async Task Main(string[] args)
 	{	
-		//dataBase.AddPlayer("saba");
 		Env.Load();
 		// Configure the bot client with necessary intents to track guilds, members, and presence updates
 		var socketConfig = new DiscordSocketConfig
