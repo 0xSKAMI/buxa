@@ -87,22 +87,28 @@ namespace Database
 
 		}
 
-		public async Task FindMostPlayedGameWeek()
+		//method to get info about top 5 games played in week
+		public async Task<WeekGame[]> FindMostPlayedGameWeek()
 		{
 			await globalConn.OpenAsync();
 
 			try
 			{
 				using var cmd = new NpgsqlCommand();
-				cmd.CommandText = "SELECT playerId FROM PlayerGames WHERE creation_date >= NOW() - INTERVAL '7 days'";
+				cmd.CommandText = "SELECT games.name, SUM(played_time) AS total_played_time FROM playergames INNER JOIN games ON playerGames.gameId = Games.gameid GROUP BY games.gameId ORDER BY total_played_time DESC LIMIT 5";
+
 				cmd.Connection = globalConn;
 
 				using var result = await cmd.ExecuteReaderAsync();
 				
+				WeekGame[] localWeekGame = new WeekGame[result.FieldCount];
+				int i = 0;
 				while(await result.ReadAsync())
 				{
-					Console.WriteLine(result.GetString(0));
+					localWeekGame[i] = new WeekGame {gameName = Convert.ToString(result.GetValue(0)), playTime = result.GetTimeSpan(1)};
+					i++;
 				}
+				return localWeekGame;
 			}
 			finally
 			{
@@ -182,5 +188,11 @@ namespace Database
 				await globalConn.CloseAsync();
 			}
 		}
+	}
+
+	public class WeekGame
+	{
+		public string gameName {get; set;}
+		public TimeSpan playTime {get; set;}
 	}
 }

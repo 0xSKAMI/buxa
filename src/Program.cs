@@ -18,6 +18,7 @@ public class Program
 	// Main entry point of the application
 	private static async Task Main(string[] args)
 	{	
+		//dataBase.FindMostPlayedGameWeek();
 		Env.Load();
 		// Configure the bot client with necessary intents to track guilds, members, and presence updates
 		var socketConfig = new DiscordSocketConfig
@@ -57,14 +58,26 @@ public class Program
 	public static async Task CreateCommand()
 	{
 		SlashCommandBuilder testCommand = new SlashCommandBuilder();
-		testCommand.WithName("first-commanmd");
-		testCommand.WithDescription("does nothing");
+		testCommand.WithName("weekgame");
+		testCommand.WithDescription("shows most played games of week and times they were played");
 		await _client.CreateGlobalApplicationCommandAsync(testCommand.Build());
 	}
 
 	public static async Task CommandHandler(SocketSlashCommand command)
 	{
-		await command.RespondAsync("yooo");	
+		switch(Convert.ToString(command.CommandName))
+			{
+				case "weekgame":
+					WeekGame[] localWeekGame = await dataBase.FindMostPlayedGameWeek();
+					Console.WriteLine(localWeekGame.Length);
+					string result = "";
+					foreach(WeekGame forWeekGame in localWeekGame)
+					{
+						result = result + forWeekGame.gameName + " " + forWeekGame.playTime + "\n";
+					}
+					await command.RespondAsync(result);
+					break;
+			}
 	}
 	
 	//Managing Threads for activity
