@@ -69,15 +69,32 @@ public class Program
 			{
 				case "weekgame":
 					WeekGame[] localWeekGame = await dataBase.FindMostPlayedGameWeek();
-					Console.WriteLine(localWeekGame.Length);
 					string result = "";
 					foreach(WeekGame forWeekGame in localWeekGame)
 					{
 						result = result + forWeekGame.gameName + " " + forWeekGame.playTime + "\n";
 					}
-					await command.RespondAsync(result);
+					var some = testing(localWeekGame);
+					await command.RespondAsync(embed: some);
 					break;
 			}
+	}
+
+	private static Embed testing(Array someArray) 
+	{
+		EmbedBuilder embed = new EmbedBuilder
+			{
+				Title = "Top " + someArray.Length + " ganes played in week",
+			};
+		
+		foreach(WeekGame someValue in someArray)
+		{
+			embed.AddField(someValue.gameName, someValue.playTime);
+		}
+		
+		var result = embed.Build();
+
+		return result;
 	}
 
 	//This method is called when a user's activity or status changes (presence update)
