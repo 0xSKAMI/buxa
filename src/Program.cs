@@ -33,7 +33,7 @@ public class Program
 		string token = Env.GetString("TOKEN");
 
 		// Subscribe to events that the bot should listen to
-		_client.PresenceUpdated += ThreadManager; // Event triggered when a user's presence changes (activity, status, etc.)
+		_client.PresenceUpdated += ActivityHandler; // Event triggered when a user's presence changes (activity, status, etc.)
 		_client.Log += LogMessage; // Event triggered for logging messages from the bot
 		_client.Ready += CreateCommand;
 		_client.SlashCommandExecuted += CommandHandler;
@@ -78,17 +78,6 @@ public class Program
 					await command.RespondAsync(result);
 					break;
 			}
-	}
-	
-	//Managing Threads for activity
-	private static async Task ThreadManager(SocketUser user, SocketPresence oldPresence, SocketPresence newPresence)
-	{
-		Thread test = new Thread(() => ActivityHandler(user, oldPresence, newPresence))
-		{
-			Name = Convert.ToString(ThreadCount)
-		};
-		ThreadCount++;
-		test.Start();
 	}
 
 	//This method is called when a user's activity or status changes (presence update)
