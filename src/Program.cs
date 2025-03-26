@@ -84,7 +84,7 @@ public class Program
 	{
 		EmbedBuilder embed = new EmbedBuilder
 			{
-				Title = "Top " + someArray.Length + " ganes played in week",
+				Title = "Top " + someArray.Length + " games played in week",
 			};
 		
 		foreach(WeekGame someValue in someArray)
