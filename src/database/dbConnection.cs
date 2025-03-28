@@ -1,7 +1,7 @@
-	using DotNetEnv;
-	using Npgsql;
+using DotNetEnv;
+using Npgsql;
 
-// here is code for the database
+// here is code for the databasesing DotNetEnv; using Npgsql; // here is code for the database namespace Database
 namespace Database
 {
 	// this is database class that conatins all of the db methods right now

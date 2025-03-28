@@ -55,6 +55,7 @@ public class Program
 		await Task.CompletedTask;
 	}
 
+	//this method creates commands
 	public static async Task CreateCommand()
 	{
 		SlashCommandBuilder testCommand = new SlashCommandBuilder();
@@ -63,6 +64,7 @@ public class Program
 		await _client.CreateGlobalApplicationCommandAsync(testCommand.Build());
 	}
 
+	//this method is more of a method that not handles but distributes handlers and commands
 	public static async Task CommandHandler(SocketSlashCommand command)
 	{
 		switch(Convert.ToString(command.CommandName))
@@ -80,6 +82,7 @@ public class Program
 			}
 	}
 
+	//this method is used for creating embed messages
 	private static Embed testing(Array someArray) 
 	{
 		EmbedBuilder embed = new EmbedBuilder
@@ -164,6 +167,7 @@ public class Program
 }
 
 
+//this classs is just used for calculating time that someone played the game
 public class User
 {
 	public string userName {get; }
