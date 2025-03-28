@@ -71,28 +71,28 @@ public class Program
 			{
 				case "weekgame":
 					WeekGame[] localWeekGame = await dataBase.FindMostPlayedGameWeek();
-					string result = "";
-					foreach(WeekGame forWeekGame in localWeekGame)
-					{
-						result = result + forWeekGame.gameName + " " + forWeekGame.playTime + "\n";
-					}
-					var some = testing(localWeekGame);
+
+					var some = CreateEmbedMessage(localWeekGame);
 					await command.RespondAsync(embed: some);
 					break;
 			}
 	}
 
 	//this method is used for creating embed messages
-	private static Embed testing(Array someArray) 
+	private static Embed CreateEmbedMessage(Array someArray) 
 	{
 		EmbedBuilder embed = new EmbedBuilder
 			{
 				Title = "Top " + someArray.Length + " games played in week",
 			};
 		
+		string time = "";
+
 		foreach(WeekGame someValue in someArray)
 		{
-			embed.AddField(someValue.gameName, someValue.playTime);
+			time = time + $"{someValue.playTime.Hours}h {someValue.playTime.Minutes}m";
+			embed.AddField(someValue.gameName, time);
+			time = "";
 		}
 		
 		var result = embed.Build();
