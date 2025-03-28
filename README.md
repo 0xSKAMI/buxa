@@ -27,3 +27,30 @@ To get started, make sure to have **.NET 8** installed.
     ```bash
     dotnet run
     ```
+
+That’s it! Your bot should now be up and running.
+
+---
+
+<div align="center">
+  <h2>DATABASE SETUP</h2>
+</div>
+
+Before running the bot, you need to create the necessary tables in your PostgreSQL database. Use the following SQL script:
+
+```sql
+CREATE TABLE players (
+    playerid CHAR(255) PRIMARY KEY
+);
+
+CREATE TABLE games (
+    gameid SERIAL PRIMARY KEY,
+    name CHAR(255) NOT NULL
+);
+
+CREATE TABLE playergames (
+    gameid INTEGER REFERENCES games(gameid),
+    playerid CHAR(255) REFERENCES players(playerid),
+    played_time INTERVAL,
+    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
