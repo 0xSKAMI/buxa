@@ -26,4 +26,4 @@ To get started, make sure to have **.NET 8** installed.
 
     ```bash
     dotnet run
-    ```D
+    ```
