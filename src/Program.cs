@@ -18,7 +18,6 @@ public class Program
 	// Main entry point of the application
 	private static async Task Main(string[] args)
 	{	
-		//dataBase.FindMostPlayedGameWeek();
 		Env.Load();
 		// Configure the bot client with necessary intents to track guilds, members, and presence updates
 		var socketConfig = new DiscordSocketConfig
@@ -35,7 +34,12 @@ public class Program
 		// Subscribe to events that the bot should listen to
 		_client.PresenceUpdated += ActivityHandler; // Event triggered when a user's presence changes (activity, status, etc.)
 		_client.Log += LogMessage; // Event triggered for logging messages from the bot
-		_client.Ready += CreateCommand;
+		_client.Ready += async () => 
+		{
+			Console.WriteLine(_client.GetUser("shavleg").ActiveClients.Count());
+			
+			CreateCommand();
+		};
 		_client.SlashCommandExecuted += CommandHandler;
 
 		// Log in the bot with the token a:wnd start the connection
@@ -85,14 +89,10 @@ public class Program
 			{
 				Title = "Top " + someArray.Length + " games played in week",
 			};
-		
-		string time = "";
 
 		foreach(WeekGame someValue in someArray)
 		{
-			time = time + $"{someValue.playTime.Hours}h {someValue.playTime.Minutes}m";
-			embed.AddField(someValue.gameName, time);
-			time = "";
+			embed.AddField(someValue.gameName, $"{someValue.playTime.Hours}h {someValue.playTime.Minutes}m");
 		}
 		
 		var result = embed.Build();
