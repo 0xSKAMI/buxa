@@ -157,7 +157,7 @@ public class Program
 		{	
 			string newGame = Convert.ToString(newPresenceVar.First().Name);
 			User localUser = new User(Convert.ToString(user), newGame);
-			if(!users.Any(e => e.userName == localUser.userName && e.game == localUser.game))
+			if(!users.Any(e => e.userName == localUser.userName && e.game == localUser.game) && !users.Any(e => e.userName == localUser.userName))
 			{
 				users.Add(localUser);
 				Console.WriteLine("game added");
