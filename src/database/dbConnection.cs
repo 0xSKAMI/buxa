@@ -100,8 +100,14 @@ namespace Database
 				cmd.Connection = globalConn;
 
 				using var result = await cmd.ExecuteReaderAsync();
-				
-				WeekGame[] localWeekGame = new WeekGame[result.FieldCount];
+
+				int FieldNumber = result.FieldCount;
+				if(result.HasRows == false)
+				{
+					FieldNumber = 0;
+				}
+
+				WeekGame[] localWeekGame = new WeekGame[FieldNumber];
 				int i = 0;
 				while(await result.ReadAsync())
 				{

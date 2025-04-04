@@ -34,12 +34,7 @@ public class Program
 		// Subscribe to events that the bot should listen to
 		_client.PresenceUpdated += ActivityHandler; // Event triggered when a user's presence changes (activity, status, etc.)
 		_client.Log += LogMessage; // Event triggered for logging messages from the bot
-		_client.Ready += async () => 
-		{
-			Console.WriteLine(_client.GetUser("shavleg").ActiveClients.Count());
-			
-			CreateCommand();
-		};
+		_client.Ready += CreateCommand;
 		_client.SlashCommandExecuted += CommandHandler;
 
 		// Log in the bot with the token a:wnd start the connection
@@ -75,6 +70,13 @@ public class Program
 			{
 				case "weekgame":
 					WeekGame[] localWeekGame = await dataBase.FindMostPlayedGameWeek();
+					Console.WriteLine(localWeekGame.Length);
+					if(localWeekGame.Length == 0)
+					{
+						await command.RespondAsync("No records found");
+						break;
+					}
+					Console.WriteLine(localWeekGame.Length);
 
 					var some = CreateEmbedMessage(localWeekGame);
 					await command.RespondAsync(embed: some);
