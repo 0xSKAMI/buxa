@@ -3,6 +3,7 @@ using Discord.WebSocket; // Provides the WebSocket-based client
 using DotNetEnv; // To load environment variables from a `.env` file using System; // Basic system functionalities like Console output
 using System.Net.Http;
 using SteamN;
+using System.Diagnostics; //This namespace is used to open links in browser
 
 
 public class Program
@@ -34,9 +35,12 @@ public class Program
 		// Log in the bot with the token a:wnd start the connection
 		await _client.LoginAsync(TokenType.Bot, token);
 		await _client.StartAsync();
-
-		// Keep the bot running indefinitely
-		await Task.Delay(-1);
+		
+		//start listening to port indefinatly 
+		while(true)
+		{
+			Steam.ListenToPort();
+		}
 	}
 
 	// This method is called whenever a new log message is generated (for debugging or logging purposes)
@@ -75,7 +79,13 @@ public class Program
 		switch(command.Data.Name)
 		{
 			case "connect":
-				await command.RespondAsync($"{command.User}");
+				await command.RespondAsync("hi");
+
+				Process.Start(new ProcessStartInfo
+				{
+						FileName = "http://127.0.0.1:3000",
+						UseShellExecute = true
+				});
 				break;
 		}
 		// We need to extract the user parameter from the command. since we only have one option and it's required, we can just use the first option.
