@@ -5,6 +5,7 @@ using System.Net.Http;
 using SteamN;
 using System.Diagnostics; //This namespace is used to open links in browser
 using DB;
+using Handler;
 
 public class Program
 {   
@@ -17,14 +18,11 @@ public class Program
 		}
 	);
 	public static Steam stm = new Steam();
+	public static Player plr = new Player();
 
 	// Main entry point of the application
 	private static async Task Main(string[] args)
 	{	
-		Database something = Database.Instance;
-		string testing = "12312421";
-		await something.CreateUser("saba", Convert.ToInt32(testing));
-
 		Env.Load();
 		stm.Connect();
 
@@ -40,11 +38,7 @@ public class Program
 		await _client.LoginAsync(TokenType.Bot, token);
 		await _client.StartAsync();
 		
-		//start listening to port indefinatly 
-		while(true)
-		{
-			Steam.ListenToPort();
-		}
+		await Task.Delay(-1);
 	}
 
 	// This method is called whenever a new log message is generated (for debugging or logging purposes)
@@ -77,17 +71,26 @@ public class Program
 		await Task.CompletedTask;
 	}
 
+	//handler for slash commands
 	private static async Task SlashCommandHandler(SocketSlashCommand command)
 	{
 		switch(command.Data.Name)
 		{
 			case "connect":
-				await command.RespondAsync(command.User.AvatarId);
-
+				//declare steamId to save steam ID there
+				string steamId = "";
+				//reply to user
+				await command.RespondAsync("Sign in with your steam account");
+				//open link in broser
 				Process.Start(new ProcessStartInfo
 				{
 						FileName = "https://steamcommunity.com/openid/login?openid.ns=http://specs.openid.net/auth/2.0&openid.mode=checkid_setup&openid.return_to=http://127.0.0.1:3000/return/&openid.realm=http://127.0.0.1:3000/&openid.identity=http://specs.openid.net/auth/2.0/identifier_select&openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select",
 						UseShellExecute = true
+				});
+				//start listening to port and when user signs up update database
+				_= Task.Run(async () => {
+					string steamId = await Steam.ListenToPort();
+					await plr.ConnectPlayer(command.User.AvatarId, long.Parse(steamId));
 				});
 				break;
 		}

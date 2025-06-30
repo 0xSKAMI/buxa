@@ -12,7 +12,7 @@ namespace SteamN{
 			//initialise http client
 			public static HttpClient Client = new HttpClient();
 			//this method is used to connect to server and get data
-			public async void Connect()
+			public async Task Connect()
 			{
 				//load env variables
 				Env.Load();
@@ -31,12 +31,13 @@ namespace SteamN{
 			}
 	
 			//method to listen to port
-			public static void ListenToPort()
+			public static async Task<string> ListenToPort()
 			{
 				//initilise listener
 				HttpListener listener = new HttpListener();
 				//give it prefix to listen on
 				listener.Prefixes.Add("http://127.0.0.1:3000/return/");
+				string steamId = "";
 				try
 				{
 					listener.Start();
@@ -46,12 +47,11 @@ namespace SteamN{
 					//get request to extract steamId
 					HttpListenerRequest request = context.Request;
 					var paramsCollection = HttpUtility.ParseQueryString(request.Url.Query);
-					string steamId = paramsCollection["openid.claimed_id"].Split('/').Last();
+					steamId = paramsCollection["openid.claimed_id"].Split('/').Last();
 					if (string.IsNullOrEmpty(steamId))
 					{
 						throw new Exception("Steam login failed or was cancelled. No claimed_id returned.");
 					}
-					Console.WriteLine(steamId);
 					
 					//get response (we will need to send HTML to user)
 					HttpListenerResponse response = context.Response;
@@ -72,6 +72,7 @@ namespace SteamN{
 				{
 					listener.Stop();
 				}
+				return steamId;
 			}
 
 			private static void RespondHtml(HttpListenerResponse response, string toSend)
