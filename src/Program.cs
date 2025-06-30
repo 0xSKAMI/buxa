@@ -4,7 +4,7 @@ using DotNetEnv; // To load environment variables from a `.env` file using Syste
 using System.Net.Http;
 using SteamN;
 using System.Diagnostics; //This namespace is used to open links in browser
-
+using DB;
 
 public class Program
 {   
@@ -21,6 +21,10 @@ public class Program
 	// Main entry point of the application
 	private static async Task Main(string[] args)
 	{	
+		Database something = Database.Instance;
+		string testing = "12312421";
+		await something.CreateUser("saba", Convert.ToInt32(testing));
+
 		Env.Load();
 		stm.Connect();
 
