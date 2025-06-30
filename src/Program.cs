@@ -16,13 +16,13 @@ public class Program
 			GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMembers | GatewayIntents.GuildPresences | GatewayIntents.GuildMessages | GatewayIntents.MessageContent
 		}
 	);
-	public static Steam something = new Steam();
+	public static Steam stm = new Steam();
 
 	// Main entry point of the application
 	private static async Task Main(string[] args)
 	{	
 		Env.Load();
-		something.Connect();
+		stm.Connect();
 
 		// Retrieve the bot token from the environment variables
 		string token = Env.GetString("TOKEN");
@@ -60,7 +60,6 @@ public class Program
 		
 		commandBuilder.WithName("connect");
 		commandBuilder.WithDescription("connects steam account to discord account");
-		commandBuilder.AddOption("steam_id", ApplicationCommandOptionType.String, "steam id", isRequired: true);
 		
 		//try to build command and if something goes wrong write it in console
 		try
@@ -79,19 +78,14 @@ public class Program
 		switch(command.Data.Name)
 		{
 			case "connect":
-				await command.RespondAsync("hi");
+				await command.RespondAsync(command.User.AvatarId);
 
 				Process.Start(new ProcessStartInfo
 				{
-						FileName = "http://127.0.0.1:3000",
+						FileName = "https://steamcommunity.com/openid/login?openid.ns=http://specs.openid.net/auth/2.0&openid.mode=checkid_setup&openid.return_to=http://127.0.0.1:3000/return/&openid.realm=http://127.0.0.1:3000/&openid.identity=http://specs.openid.net/auth/2.0/identifier_select&openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select",
 						UseShellExecute = true
 				});
 				break;
 		}
-		// We need to extract the user parameter from the command. since we only have one option and it's required, we can just use the first option.
-    var guildUser = command.Data.Options.First().Value;
-
-    // Now, Let's respond with the embed.
-    await command.RespondAsync(Convert.ToString(guildUser));
 	}
 }
