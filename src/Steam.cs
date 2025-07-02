@@ -12,7 +12,7 @@ namespace SteamN{
 			//initialise http client
 			public static HttpClient Client = new HttpClient();
 			//this method is used to connect to server and get data
-			public async Task Connect()
+			public async Task<JsonElement> GetGames(string steamId)
 			{
 				//load env variables
 				Env.Load();
@@ -23,11 +23,13 @@ namespace SteamN{
 				while (true)
 				{
 					//send GET request to server
-					result = await Client.GetAsync($"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={steam_key}&steamid=76561199571191880&include_appinfo=true&include_played_free_games=true&include_free_sub=true&skip_unvetted_apps=true&include_extended_appinfo=true");
+					result = await Client.GetAsync($"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={steam_key}&steamid={steamId}&include_appinfo=true&include_played_free_games=true&include_free_sub=true&skip_unvetted_apps=true&include_extended_appinfo=true");
 					if (result.IsSuccessStatusCode) break;
 				}
 				string content = await result.Content.ReadAsStringAsync();
-				string jsonString = JsonSerializer.Serialize(content);
+				var jsonString = JsonDocument.Parse(content);
+				var root = jsonString.RootElement.GetProperty("response").GetProperty("games");
+				return root;
 			}
 	
 			//method to listen to port

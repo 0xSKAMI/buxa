@@ -19,12 +19,12 @@ public class Program
 	);
 	public static Steam stm = new Steam();
 	public static Player plr = new Player();
+	public static Database db = Database.Instance;
 
 	// Main entry point of the application
 	private static async Task Main(string[] args)
 	{	
 		Env.Load();
-		stm.Connect();
 
 		// Retrieve the bot token from the environment variables
 		string token = Env.GetString("TOKEN");
