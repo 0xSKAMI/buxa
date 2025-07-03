@@ -44,7 +44,6 @@ namespace Handler
 						}
 					}
 				});
-				gameProcess.Wait();
 				await db.CreateUser(discordId, steamId);
 			}
 		}

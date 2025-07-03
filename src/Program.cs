@@ -4,6 +4,7 @@ using DotNetEnv; // To load environment variables from a `.env` file using Syste
 using System.Net.Http;
 using SteamN;
 using System.Diagnostics; //This namespace is used to open links in browser
+using System.Text.Json;
 using DB;
 using Handler;
 
@@ -77,22 +78,35 @@ public class Program
 		switch(command.Data.Name)
 		{
 			case "connect":
-				//declare steamId to save steam ID there
-				string steamId = "";
-				//reply to user
-				await command.RespondAsync("Sign in with your steam account");
-				//open link in broser
-				Process.Start(new ProcessStartInfo
 				{
-						FileName = "https://steamcommunity.com/openid/login?openid.ns=http://specs.openid.net/auth/2.0&openid.mode=checkid_setup&openid.return_to=http://127.0.0.1:3000/return/&openid.realm=http://127.0.0.1:3000/&openid.identity=http://specs.openid.net/auth/2.0/identifier_select&openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select",
-						UseShellExecute = true
-				});
-				//start listening to port and when user signs up update database
-				_= Task.Run(async () => {
-					string steamId = await Steam.ListenToPort();
-					await plr.ConnectPlayer(command.User.AvatarId, long.Parse(steamId));
-				});
-				break;
+					//declare steamId to save steam ID there
+					string steamId = "";
+					//reply to user
+					await command.RespondAsync("Sign in with your steam account");
+					//open link in broser
+					using var client = new HttpClient();
+					string json = await client.GetStringAsync("http://127.0.0.1:4040/api/tunnels");
+					string url = System.Text.Json.JsonDocument.Parse(json)
+							.RootElement.GetProperty("tunnels")[0]
+							.GetProperty("public_url").GetString();
+
+					string steamUrl = "https://steamcommunity.com/openid/login?" +
+							"openid.ns=http://specs.openid.net/auth/2.0" +
+							"&openid.mode=checkid_setup" +
+							$"&openid.return_to={url}/return/" +
+							$"&openid.realm={url}/" +
+							"&openid.identity=http://specs.openid.net/auth/2.0/identifier_select" +
+							"&openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select";
+
+					System.Diagnostics.Process.Start(new ProcessStartInfo { FileName = steamUrl, UseShellExecute = true });
+
+					//start listening to port and when user signs up update database
+					_= Task.Run(async () => {
+						string steamId = await Steam.ListenToPort();
+						await plr.ConnectPlayer(command.User.AvatarId, long.Parse(steamId));
+					});
+					break;
+				}
 		}
 	}
 }

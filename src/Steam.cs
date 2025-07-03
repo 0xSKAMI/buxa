@@ -38,7 +38,7 @@ namespace SteamN{
 				//initilise listener
 				HttpListener listener = new HttpListener();
 				//give it prefix to listen on
-				listener.Prefixes.Add("http://127.0.0.1:3000/return/");
+				listener.Prefixes.Add("http://+:3000/return/");
 				string steamId = "";
 				try
 				{
