@@ -25,7 +25,7 @@ namespace Handler
 					{
 						if(Convert.ToString(games.Current.GetProperty("playtime_forever")) != "0")
 						{
-							await db.CreateGame(Convert.ToInt32(games.Current.GetProperty("appid")), Convert.ToString(games.Current.GetProperty("name")), Convert.ToInt32(games.Current.GetProperty("playtime_forever")));
+							await db.CreateGame(games.Current.GetProperty("appid").GetInt32(), games.Current.GetProperty("name").GetString(), games.Current.GetProperty("playtime_forever").GetInt32());
 						}
 					}
 				});
@@ -35,15 +35,15 @@ namespace Handler
 			{
 				var root = await stm.GetGames(Convert.ToString(steamId));
 				var games = root.EnumerateArray();
-				var gameProcess = Task.Run(async () => {
+				_= Task.Run(async () => {
 					while(games.MoveNext())
-					{
-						if(Convert.ToString(games.Current.GetProperty("playtime_forever")) != "0")
 						{
-							await db.CreateGame(Convert.ToInt32(games.Current.GetProperty("appid")), Convert.ToString(games.Current.GetProperty("name")), Convert.ToInt32(games.Current.GetProperty("playtime_forever")));
+							if(Convert.ToString(games.Current.GetProperty("playtime_forever")) != "0")
+							{
+								await db.CreateGame(games.Current.GetProperty("appid").GetInt32(), games.Current.GetProperty("name").GetString(), games.Current.GetProperty("playtime_forever").GetInt32());
+							}
 						}
-					}
-				});
+					});
 				await db.CreateUser(discordId, steamId);
 			}
 		}

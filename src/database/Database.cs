@@ -87,14 +87,21 @@ namespace DB
 
 		public async Task CreateGame(int id, string name, int full)
 		{
-			await using var command = dataSource.CreateCommand("INSERT INTO games (gameid, name, full_time) VALUES ($1, $2, $3) ON CONFLICT (gameid) DO UPDATE SET full_time = games.full_time + EXCLUDED.full_time");
+			await using var command = dataSource.CreateCommand("INSERT INTO games (gameid, name, full_time) VALUES ($1, $2, $3)");
 
 			command.Parameters.AddWithValue(id);
 			command.Parameters.AddWithValue(name);
 			command.Parameters.AddWithValue(full);
 
-			await command.ExecuteNonQueryAsync();
-			await Task.CompletedTask;
+			try
+			{
+				await command.ExecuteNonQueryAsync();
+				await Task.CompletedTask;
+			}
+			catch
+			{
+				throw;
+			}
 		}
 
 		public async Task DeleteGame(string discordId, string steamId)
