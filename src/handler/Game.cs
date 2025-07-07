@@ -21,51 +21,66 @@ namespace Handler
 			//get user's games in steam library
 			var root = await stm.GetGames(Convert.ToString(steamId));
 			var games = root.EnumerateArray();
-			//make a task so it will run in background
-			_= Task.Run(async () => {
-				//start a loop
-				while(games.MoveNext())
+			
+			var tasks = new List<Task>();
+
+			//start a loop
+			while (games.MoveNext())
+			{
+				var game = games.Current; // <--- IMPORTANT FIX
+
+				if (game.GetProperty("playtime_forever").ToString() != "0")
+				{
+					//make a tasks so it will run in background
+					tasks.Add(Task.Run(async () =>
 					{
-						if(Convert.ToString(games.Current.GetProperty("playtime_forever")) != "0")
+						int appId = game.GetProperty("appid").GetInt32();
+						int playtime = game.GetProperty("playtime_forever").GetInt32();
+						string name = game.GetProperty("name").GetString();
+
+						if (await db.GetGame(appId) == "1")
 						{
-							if (await db.GetGame(games.Current.GetProperty("appid").GetInt32()) == "1")
-							{
-								await db.UpdateGameTimeAdd(games.Current.GetProperty("appid").GetInt32(), games.Current.GetProperty("playtime_forever").GetInt32());
-							}
-							else
-							{
-								await db.CreateGame(games.Current.GetProperty("appid").GetInt32(), games.Current.GetProperty("name").GetString(), games.Current.GetProperty("playtime_forever").GetInt32());
-							}
+							await db.UpdateGameTimeAdd(appId, playtime);
 						}
-					}
+						else
+						{
+							await db.CreateGame(appId, name, playtime);
+						}
+					}));
 				}
-			);
+			}
 		}
 
 		//method for updating game where first we subtract time from games previous steam user had and then do basically AddGame (used when user updates steamId)
 		public async Task UpdateGames(long steamId, long oldSteamId)
 		{
 			Database db = Database.Instance;
-
 			var root = await stm.GetGames(Convert.ToString(steamId));
 			var games = root.EnumerateArray();
-			//declare task and give it name so we can wait for this task to finish
-			Task subtract = Task.Run(async () => {
-				while(games.MoveNext())
+			
+			var tasks = new List<Task>();
+
+			while (games.MoveNext())
+			{
+				var game = games.Current;
+
+				if (game.GetProperty("playtime_forever").GetInt32() != 0)
+				{
+					tasks.Add(Task.Run(async () =>
 					{
-						if(Convert.ToString(games.Current.GetProperty("playtime_forever")) != "0")
+						int appId = game.GetProperty("appid").GetInt32();
+						int playtime = game.GetProperty("playtime_forever").GetInt32();
+
+						if (await db.GetGame(appId) == "1")
 						{
-							if (await db.GetGame(games.Current.GetProperty("appid").GetInt32()) == "1")
-							{
-								Console.WriteLine("sab");
-								await db.UpdateGameTimeSub(games.Current.GetProperty("appid").GetInt32(), games.Current.GetProperty("playtime_forever").GetInt32());
-							}
+							await db.UpdateGameTimeSub(appId, playtime);
 						}
-					}
+					}));
 				}
-			);
-			subtract.Wait();
-			AddGames(steamId);
+			}
+
+			await Task.WhenAll(tasks);
+			await AddGames(steamId);  
 		}
 	}
 }

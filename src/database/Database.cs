@@ -145,7 +145,6 @@ namespace DB
 			try
 			{
 				await command.ExecuteNonQueryAsync();
-				Console.WriteLine(id);
 			}
 			catch
 			{
