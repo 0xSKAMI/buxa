@@ -2,11 +2,11 @@
 using Discord.WebSocket; // Provides the WebSocket-based client
 using DotNetEnv; // To load environment variables from a `.env` file using System; // Basic system functionalities like Console output
 using System.Net.Http;
-using SteamN;
+using SteamN;	//SteamN namespace can be found in Steam.cs
 using System.Diagnostics; //This namespace is used to open links in browser
-using System.Text.Json;
-using DB;
+using System.Text.Json;		//JSON
 using Handler;
+using System;
 
 public class Program
 {   
@@ -20,7 +20,6 @@ public class Program
 	);
 	public static Steam stm = new Steam();
 	public static Player plr = new Player();
-	public static Database db = Database.Instance;
 
 	// Main entry point of the application
 	private static async Task Main(string[] args)
@@ -40,6 +39,12 @@ public class Program
 		await _client.StartAsync();
 		
 		await Task.Delay(-1);
+	}
+
+	public static string testing()
+	{
+		Console.WriteLine("sab");
+		return "sab";
 	}
 
 	// This method is called whenever a new log message is generated (for debugging or logging purposes)

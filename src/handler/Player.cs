@@ -10,6 +10,7 @@ namespace Handler
 	public class Player
 	{
 		public static Steam stm = new Steam();
+		public static Game game = new Game();
 
 		//method to handle /connect and update database
 		public async Task ConnectPlayer(string discordId, long steamId)
@@ -18,32 +19,14 @@ namespace Handler
 			var reader = await db.GetUser(discordId);
 			if (reader != Convert.ToString(steamId) && reader != "0" && reader != "3")
 			{
-				var root = await stm.GetGames(Convert.ToString(steamId));
-				var games = root.EnumerateArray();
-				_= Task.Run(async () => {
-					while(games.MoveNext())
-					{
-						if(Convert.ToString(games.Current.GetProperty("playtime_forever")) != "0")
-						{
-							await db.CreateGame(games.Current.GetProperty("appid").GetInt32(), games.Current.GetProperty("name").GetString(), games.Current.GetProperty("playtime_forever").GetInt32());
-						}
-					}
-				});
+				game.UpdateGames(steamId, long.Parse(reader));
+
 				await db.UpdateUser(discordId, steamId);
 			}
 			else if(reader == "0")
 			{
-				var root = await stm.GetGames(Convert.ToString(steamId));
-				var games = root.EnumerateArray();
-				_= Task.Run(async () => {
-					while(games.MoveNext())
-						{
-							if(Convert.ToString(games.Current.GetProperty("playtime_forever")) != "0")
-							{
-								await db.CreateGame(games.Current.GetProperty("appid").GetInt32(), games.Current.GetProperty("name").GetString(), games.Current.GetProperty("playtime_forever").GetInt32());
-							}
-						}
-					});
+				game.AddGames(steamId);
+
 				await db.CreateUser(discordId, steamId);
 			}
 		}

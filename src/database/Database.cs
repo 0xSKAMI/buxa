@@ -81,8 +81,24 @@ namespace DB
 			return "3";
 		}
 
-		public async Task DeleteUser(string discordId, string steamId)
+		public async Task<string> GetGame(int id)
 		{
+			await using var command = dataSource.CreateCommand("SELECT gameid FROM games WHERE gameid = $1");
+			command.Parameters.AddWithValue(id);
+			string result = "3";
+
+			try
+			{
+				await using var reader = await command.ExecuteReaderAsync();
+
+				result = (reader.HasRows == true) ? "1" : "0";
+				return result;
+			}
+			catch
+			{
+				return "3";
+				throw;
+			}
 		}
 
 		public async Task CreateGame(int id, string name, int full)
@@ -100,18 +116,41 @@ namespace DB
 			}
 			catch
 			{
+				throw; 
+			}
+		}
+
+		public async Task UpdateGameTimeAdd(int id, int time)
+		{
+			await using var command = dataSource.CreateCommand("UPDATE games SET full_time = full_time + $2 WHERE gameid = $1");
+			command.Parameters.AddWithValue(id);
+			command.Parameters.AddWithValue(time);
+			
+			try
+			{
+				await command.ExecuteNonQueryAsync();
+			}
+			catch
+			{
 				throw;
 			}
 		}
 
-		public async Task DeleteGame(string discordId, string steamId)
+		public async Task UpdateGameTimeSub(int id, int time)
 		{
-		}
-
-		public async Task DeleteAllGame()
-		{
-			await using var command = dataSource.CreateCommand("DELETE * FROM games");
-			await command.ExecuteNonQueryAsync();
+			await using var command = dataSource.CreateCommand("UPDATE games SET full_time = full_time - $2 WHERE gameid = $1");
+			command.Parameters.AddWithValue(id);
+			command.Parameters.AddWithValue(time);
+			
+			try
+			{
+				await command.ExecuteNonQueryAsync();
+				Console.WriteLine(id);
+			}
+			catch
+			{
+				throw;
+			}
 		}
 
 		public async ValueTask DisposeAsync()
