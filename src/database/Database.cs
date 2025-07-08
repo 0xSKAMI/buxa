@@ -152,6 +152,21 @@ namespace DB
 			}
 		}
 
+		public async Task CreateSession(int id, string playerId, int time, int windows_time, int mac_time, int linux_time, int deck_time)
+		{
+			await using var command = dataSource.CreateCommand("INSERT INTO sessions (gameid, playerid, played_time, windows_played, mac_played, linux_played, deck_played) VALUES ($1, $2, $3, $4, $5, $6, $7)");
+
+			command.Parameters.AddWithValue(id);
+			command.Parameters.AddWithValue(playerId);
+			command.Parameters.AddWithValue(time);
+			command.Parameters.AddWithValue(windows_time);
+			command.Parameters.AddWithValue(mac_time);
+			command.Parameters.AddWithValue(linux_time);
+			command.Parameters.AddWithValue(deck_time);
+
+			command.ExecuteNonQuery();
+		}
+
 		public async ValueTask DisposeAsync()
 		{
 			await dataSource.DisposeAsync();
