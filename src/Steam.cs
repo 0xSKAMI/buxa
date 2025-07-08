@@ -33,7 +33,7 @@ namespace SteamN{
 			}
 	
 			//method to listen to port
-			public static async Task<string> ListenToPort()
+			public static async Task ListenToPort(TaskCompletionSource<string> tcs)
 			{
 				//initilise listener
 				HttpListener listener = new HttpListener();
@@ -43,6 +43,8 @@ namespace SteamN{
 				try
 				{
 					listener.Start();
+
+					_= Task.Run(async() => {Thread.Sleep(TimeSpan.FromMinutes(1)); listener.Stop();});
 
 					//get context (object that contains practically everything we need)
 					HttpListenerContext context = listener.GetContext();
@@ -74,7 +76,7 @@ namespace SteamN{
 				{
 					listener.Stop();
 				}
-				return steamId;
+				tcs.SetResult(steamId);
 			}
 
 			private static void RespondHtml(HttpListenerResponse response, string toSend)

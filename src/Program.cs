@@ -7,6 +7,8 @@ using System.Diagnostics; //This namespace is used to open links in browser
 using System.Text.Json;		//JSON
 using Handler;
 using System;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 public class Program
 {   
@@ -20,6 +22,8 @@ public class Program
 	);
 	public static Steam stm = new Steam();
 	public static Player plr = new Player();
+	public static Task task;
+	public static Dictionary<ulong, TaskCompletionSource<string>> steamIdWaiters = new Dictionary<ulong, TaskCompletionSource<string>>();
 
 	// Main entry point of the application
 	private static async Task Main(string[] args)
@@ -37,7 +41,7 @@ public class Program
 		// Log in the bot with the token a:wnd start the connection
 		await _client.LoginAsync(TokenType.Bot, token);
 		await _client.StartAsync();
-		
+
 		await Task.Delay(-1);
 	}
 
@@ -84,10 +88,12 @@ public class Program
 		{
 			case "connect":
 				{
+					//creating TaskCompletionSource to basically create new tasks every time user types /connect
+					TaskCompletionSource<string> tcs = new TaskCompletionSource<string>();
+					//saving it into dictionary
+					steamIdWaiters[command.User.Id] = tcs;
+
 					//declare steamId to save steam ID there
-					string steamId = "";
-					//reply to user
-					await command.RespondAsync("Sign in with your steam account");
 					//open link in broser
 					using var client = new HttpClient();
 					string json = await client.GetStringAsync("http://127.0.0.1:4040/api/tunnels");
@@ -103,12 +109,19 @@ public class Program
 							"&openid.identity=http://specs.openid.net/auth/2.0/identifier_select" +
 							"&openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select";
 
-					System.Diagnostics.Process.Start(new ProcessStartInfo { FileName = steamUrl, UseShellExecute = true });
+					//reply to user
+					await command.RespondAsync("Check DM baby");
+					await command.User.SendMessageAsync(steamUrl);
 
-					//start listening to port and when user signs up update database
-					_= Task.Run(async () => {
-						string steamId = await Steam.ListenToPort();
-						await plr.ConnectPlayer(command.User.AvatarId, long.Parse(steamId));
+					//start listening to port and give it TaskCompletionSource to return result 
+					_= Task.Run(async() => {Steam.ListenToPort(steamIdWaiters[command.User.Id]);});
+
+					//Get result from ListenToPort via TaskCompletionSource and create user and games in db
+					_= Task.Run(async() => 
+					{
+						string steamId = await steamIdWaiters[command.User.Id].Task;
+						steamIdWaiters.Remove(command.User.Id);
+						await plr.ConnectPlayer(Convert.ToString(command.User.Id), long.Parse(steamId));
 					});
 					break;
 				}
