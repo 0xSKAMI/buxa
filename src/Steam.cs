@@ -24,7 +24,21 @@ namespace SteamN{
 				{
 					//send GET request to server
 					result = await Client.GetAsync($"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={steam_key}&steamid={steamId}&include_appinfo=true&include_played_free_games=true&include_free_sub=true&skip_unvetted_apps=true&include_extended_appinfo=true");
-					if (result.IsSuccessStatusCode) break;
+					if (result.IsSuccessStatusCode) 
+					{
+						break;
+					}
+					else if (Convert.ToInt16(result.StatusCode) == 400)
+					{
+						//if user had bad old steam id
+						break;
+					}
+				}
+				if(Convert.ToInt16(result.StatusCode) == 400)
+				{
+					//return empty json in case of error
+					JsonElement errResult = new JsonElement();
+					return errResult;
 				}
 				string content = await result.Content.ReadAsStringAsync();
 				var jsonString = JsonDocument.Parse(content);

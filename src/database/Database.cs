@@ -151,6 +151,40 @@ namespace DB
 				throw;
 			}
 		}
+		
+		public async Task CreatePlayerGames(int gameId, string playerId, int time)
+		{
+			await using var command = dataSource.CreateCommand("INSERT INTO playergames (gameid, playerid, played_time) VALUES ($1, $2, $3)");
+
+			command.Parameters.AddWithValue(gameId);
+			command.Parameters.AddWithValue(playerId);
+			command.Parameters.AddWithValue(time);
+
+			try
+			{
+				command.ExecuteNonQuery();
+			}
+			catch
+			{
+				throw;
+			}
+		}
+
+		public async Task DeletePlayerGames(string playerId)
+		{
+			await using var command = dataSource.CreateCommand("DELETE FROM playergames WHERE playerid = $1");
+
+			command.Parameters.AddWithValue(playerId);
+
+			try
+			{
+				command.ExecuteNonQuery();
+			}
+			catch
+			{
+				throw;
+			}
+		}
 
 		public async Task CreateSession(int id, string playerId, int time, int windows_time, int mac_time, int linux_time, int deck_time)
 		{
@@ -164,7 +198,14 @@ namespace DB
 			command.Parameters.AddWithValue(linux_time);
 			command.Parameters.AddWithValue(deck_time);
 
-			command.ExecuteNonQuery();
+			try
+			{
+				command.ExecuteNonQuery();
+			}
+			catch
+			{
+				throw;
+			}
 		}
 
 		public async ValueTask DisposeAsync()

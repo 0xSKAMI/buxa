@@ -19,13 +19,13 @@ namespace Handler
 			var reader = await db.GetUser(discordId);
 			if (reader != Convert.ToString(steamId) && reader != "0" && reader != "3")
 			{
-				game.UpdateGames(steamId, long.Parse(reader));
+				game.UpdateGames(discordId, steamId, long.Parse(reader));
 
 				await db.UpdateUser(discordId, steamId);
 			}
 			else if(reader == "0")
 			{
-				game.AddGames(steamId);
+				game.AddGames(discordId, steamId);
 
 				await db.CreateUser(discordId, steamId);
 			}
