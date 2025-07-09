@@ -27,7 +27,7 @@ namespace Handler
 			//start a loop
 			while (games.MoveNext())
 			{
-				var game = games.Current; // <--- IMPORTANT FIX
+				var game = games.Current;
 
 				if (game.GetProperty("playtime_forever").ToString() != "0")
 				{

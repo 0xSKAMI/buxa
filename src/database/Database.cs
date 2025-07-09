@@ -89,7 +89,7 @@ namespace DB
 
 			try
 			{
-				await using var reader = await command.ExecuteReaderAsync();
+				using var reader = command.ExecuteReader();
 
 				result = (reader.HasRows == true) ? "1" : "0";
 				return result;
@@ -111,7 +111,7 @@ namespace DB
 
 			try
 			{
-				await command.ExecuteNonQueryAsync();
+				command.ExecuteNonQuery();
 				await Task.CompletedTask;
 			}
 			catch
@@ -128,7 +128,7 @@ namespace DB
 			
 			try
 			{
-				await command.ExecuteNonQueryAsync();
+				command.ExecuteNonQuery();
 			}
 			catch
 			{
@@ -144,7 +144,7 @@ namespace DB
 			
 			try
 			{
-				await command.ExecuteNonQueryAsync();
+				command.ExecuteNonQuery();
 			}
 			catch
 			{
