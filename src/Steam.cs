@@ -45,8 +45,6 @@ namespace SteamN{
 				{
 					listener.Start();
 
-					_= Task.Run(async() => {Thread.Sleep(TimeSpan.FromMinutes(1)); listener.Stop();});
-
 					//get context (object that contains practically everything we need)
 					HttpListenerContext context = listener.GetContext();
 					//get request to extract steamId and discord id

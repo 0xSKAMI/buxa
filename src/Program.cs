@@ -116,6 +116,7 @@ public class Program
 					await command.RespondAsync("Check DM baby");
 					await command.User.SendMessageAsync(steamUrl);
 
+					_= Task.Run(async() => {Thread.Sleep(TimeSpan.FromMinutes(3)); 	steamIdWaiters.Remove(command.User.Id);});
 
 					//Get result from ListenToPort via TaskCompletionSource and create user and games in db
 					_= Task.Run(async() => 
