@@ -41,6 +41,9 @@ public class Program
 		// Log in the bot with the token a:wnd start the connection
 		await _client.LoginAsync(TokenType.Bot, token);
 		await _client.StartAsync();
+	
+		//start listening to port and give it TaskCompletionSource dictonary to return result 
+		_= Task.Run(async() => {while(true){Steam.ListenToPort(steamIdWaiters);};});
 
 		await Task.Delay(-1);
 	}
@@ -104,7 +107,7 @@ public class Program
 					string steamUrl = "https://steamcommunity.com/openid/login?" +
 							"openid.ns=http://specs.openid.net/auth/2.0" +
 							"&openid.mode=checkid_setup" +
-							$"&openid.return_to={url}/return/" +
+							$"&openid.return_to={url}/return/?discord_id={command.User.Id}" +
 							$"&openid.realm={url}/" +
 							"&openid.identity=http://specs.openid.net/auth/2.0/identifier_select" +
 							"&openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select";
@@ -113,8 +116,6 @@ public class Program
 					await command.RespondAsync("Check DM baby");
 					await command.User.SendMessageAsync(steamUrl);
 
-					//start listening to port and give it TaskCompletionSource to return result 
-					_= Task.Run(async() => {Steam.ListenToPort(steamIdWaiters[command.User.Id]);});
 
 					//Get result from ListenToPort via TaskCompletionSource and create user and games in db
 					_= Task.Run(async() => 

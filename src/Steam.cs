@@ -33,13 +33,14 @@ namespace SteamN{
 			}
 	
 			//method to listen to port
-			public static async Task ListenToPort(TaskCompletionSource<string> tcs)
+			public static async Task ListenToPort(Dictionary<ulong, TaskCompletionSource<string>> steamIdWaiters)
 			{
 				//initilise listener
 				HttpListener listener = new HttpListener();
 				//give it prefix to listen on
 				listener.Prefixes.Add("http://+:3000/return/");
 				string steamId = "";
+				ulong discordId = 0;
 				try
 				{
 					listener.Start();
@@ -48,10 +49,12 @@ namespace SteamN{
 
 					//get context (object that contains practically everything we need)
 					HttpListenerContext context = listener.GetContext();
-					//get request to extract steamId
+					//get request to extract steamId and discord id
 					HttpListenerRequest request = context.Request;
 					var paramsCollection = HttpUtility.ParseQueryString(request.Url.Query);
 					steamId = paramsCollection["openid.claimed_id"].Split('/').Last();
+					discordId = Convert.ToUInt64(paramsCollection["discord_id"]);
+
 					if (string.IsNullOrEmpty(steamId))
 					{
 						throw new Exception("Steam login failed or was cancelled. No claimed_id returned.");
@@ -76,7 +79,10 @@ namespace SteamN{
 				{
 					listener.Stop();
 				}
-				tcs.SetResult(steamId);
+				if(steamIdWaiters[discordId] != null)
+				{
+					steamIdWaiters[discordId].SetResult(steamId);
+				}
 			}
 
 			private static void RespondHtml(HttpListenerResponse response, string toSend)
