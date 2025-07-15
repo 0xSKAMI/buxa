@@ -1,4 +1,5 @@
 ﻿using Discord; // Discord API for bot interaction
+using Coravel;
 using Discord.WebSocket; // Provides the WebSocket-based client
 using DotNetEnv; // To load environment variables from a `.env` file using System; // Basic system functionalities like Console output
 using System.Net.Http;
@@ -22,6 +23,7 @@ public class Program
 	);
 	public static Steam stm = new Steam();
 	public static Player plr = new Player();
+	public static Session ses = new Session();
 	public static Task task;
 	public static Dictionary<ulong, TaskCompletionSource<string>> steamIdWaiters = new Dictionary<ulong, TaskCompletionSource<string>>();
 
@@ -45,14 +47,11 @@ public class Program
 		//start listening to port and give it TaskCompletionSource dictonary to return result 
 		_= Task.Run(async() => {while(true){Steam.ListenToPort(steamIdWaiters);};});
 
+		_= Task.Run(async() => {ses.SessionScheduler();});
+
 		await Task.Delay(-1);
 	}
 
-	public static string testing()
-	{
-		Console.WriteLine("sab");
-		return "sab";
-	}
 
 	// This method is called whenever a new log message is generated (for debugging or logging purposes)
 	private static async Task LogMessage(LogMessage message)
@@ -79,7 +78,7 @@ public class Program
 		}
 		catch 
 		{
-			Console.WriteLine("Creating commands went wrong");	
+			throw;
 		}
 		await Task.CompletedTask;
 	}

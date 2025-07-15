@@ -36,6 +36,10 @@ namespace Handler
 					{
 						int appId = game.GetProperty("appid").GetInt32();
 						int playtime = game.GetProperty("playtime_forever").GetInt32();
+						int playtime_windows = game.GetProperty("playtime_windows_forever").GetInt32();
+						int playtime_mac = game.GetProperty("playtime_mac_forever").GetInt32();
+						int playtime_linux = game.GetProperty("playtime_linux_forever").GetInt32();
+						int playtime_deck = game.GetProperty("playtime_deck_forever").GetInt32();
 						string name = game.GetProperty("name").GetString();
 
 						if (await db.GetGame(appId) == "1")
@@ -46,7 +50,7 @@ namespace Handler
 						{
 							await db.CreateGame(appId, name, playtime);
 						}
-						await db.CreatePlayerGames(appId, discordId, playtime);
+						await db.CreatePlayerGames(appId, discordId, playtime, playtime_windows, playtime_mac, playtime_linux, playtime_deck);
 					}));
 				}
 			}

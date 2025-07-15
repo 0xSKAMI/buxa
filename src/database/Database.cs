@@ -81,6 +81,28 @@ namespace DB
 			return "3";
 		}
 
+		public async Task<Dictionary<string, string>> GetAllUsers()
+		{
+			await using var command = dataSource.CreateCommand("SELECT * FROM players");
+
+			Dictionary<string, string> result = new Dictionary<string, string>();
+			try
+			{
+				await using var reader = await command.ExecuteReaderAsync(); 
+
+				while (await reader.ReadAsync())
+				{
+					result.Add(reader.GetString(0), Convert.ToString(reader.GetInt64(1)));
+				}
+				return result;
+			}
+			catch 
+			{
+				throw;
+			}
+			return result;
+		}
+
 		public async Task<string> GetGame(int id)
 		{
 			await using var command = dataSource.CreateCommand("SELECT gameid FROM games WHERE gameid = $1");
@@ -151,14 +173,43 @@ namespace DB
 				throw;
 			}
 		}
-		
-		public async Task CreatePlayerGames(int gameId, string playerId, int time)
+
+		public async Task<int[]> GetPlayerGames(int gameId, string playerId)
 		{
-			await using var command = dataSource.CreateCommand("INSERT INTO playergames (gameid, playerid, played_time) VALUES ($1, $2, $3)");
+			await using var command = dataSource.CreateCommand("SELECT * FROM playergames WHERE gameid = $1 AND playerid = $2");
+
+			command.Parameters.AddWithValue(gameId);
+			command.Parameters.AddWithValue(playerId);
+
+			try
+			{
+				await using var reader = command.ExecuteReader();
+
+				int[] result = [];
+				while (await reader.ReadAsync())
+				{
+					result = new int[] {reader.GetInt16(2), reader.GetInt16(3), reader.GetInt16(4), reader.GetInt16(5), reader.GetInt16(6)};
+				}
+
+				return result;
+			}
+			catch
+			{
+				throw;
+			}
+		}
+		
+		public async Task CreatePlayerGames(int gameId, string playerId, int time, int time_windows, int time_mac, int time_linux, int time_deck)
+		{
+			await using var command = dataSource.CreateCommand("INSERT INTO playergames (gameid, playerid, played_time, windows_played, mac_played, linux_played, deck_played) VALUES ($1, $2, $3, $4, $5, $6, $7)");
 
 			command.Parameters.AddWithValue(gameId);
 			command.Parameters.AddWithValue(playerId);
 			command.Parameters.AddWithValue(time);
+			command.Parameters.AddWithValue(time_windows);
+			command.Parameters.AddWithValue(time_mac);
+			command.Parameters.AddWithValue(time_linux);
+			command.Parameters.AddWithValue(time_deck);
 
 			try
 			{
