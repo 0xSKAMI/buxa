@@ -93,6 +93,8 @@ namespace DB
 				while (await reader.ReadAsync())
 				{
 					result.Add(reader.GetString(0), Convert.ToString(reader.GetInt64(1)));
+
+					string founder = reader.GetString(0);
 				}
 				return result;
 			}
@@ -219,6 +221,29 @@ namespace DB
 			{
 				throw;
 			}
+		}
+
+		public async Task UpdatePlayerGames(int gameId, string playerId, int time, int time_windows, int time_mac, int time_linux, int time_deck)
+		{
+			await using var command = dataSource.CreateCommand("UPDATE playergames SET played_time = played_time + $3, windows_played = windows_played + $4, mac_played = mac_played + $5, linux_played = linux_played + $6, deck_played = deck_played + $7 WHERE gameid = $1 AND playerid = $2");
+
+			command.Parameters.AddWithValue(gameId);
+			command.Parameters.AddWithValue(playerId);
+			command.Parameters.AddWithValue(time);
+			command.Parameters.AddWithValue(time_windows);
+			command.Parameters.AddWithValue(time_mac);
+			command.Parameters.AddWithValue(time_linux);
+			command.Parameters.AddWithValue(time_deck);
+
+			try
+			{
+				await command.ExecuteNonQueryAsync();
+			}
+			catch
+			{
+				throw;
+			}
+
 		}
 
 		public async Task DeletePlayerGames(string playerId)

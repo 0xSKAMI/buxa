@@ -11,6 +11,8 @@
     <PackageReference Include="Coravel" Version="6.0.2" />
     <PackageReference Include="Discord.Net" Version="3.17.1" />
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.7" />
     <PackageReference Include="Npgsql" Version="9.0.3" />
   </ItemGroup>
 

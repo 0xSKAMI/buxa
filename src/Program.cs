@@ -1,5 +1,8 @@
 ﻿using Discord; // Discord API for bot interaction
+//this 3 for scheduling tasks
 using Coravel;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Discord.WebSocket; // Provides the WebSocket-based client
 using DotNetEnv; // To load environment variables from a `.env` file using System; // Basic system functionalities like Console output
 using System.Net.Http;
@@ -43,15 +46,29 @@ public class Program
 		// Log in the bot with the token a:wnd start the connection
 		await _client.LoginAsync(TokenType.Bot, token);
 		await _client.StartAsync();
+
+		IHost host = CreateHostBuilder(args).Build();
+		host.Services.UseScheduler(scheduler => {
+				scheduler
+					.Schedule<Handler.Session>()
+					.Daily()
+					.Weekday();
+			});
+		host.Run();
 	
 		//start listening to port and give it TaskCompletionSource dictonary to return result 
 		_= Task.Run(async() => {while(true){Steam.ListenToPort(steamIdWaiters);};});
 
-		_= Task.Run(async() => {ses.SessionScheduler();});
-
 		await Task.Delay(-1);
 	}
 
+	public static IHostBuilder CreateHostBuilder(string[] args) => 
+		Host.CreateDefaultBuilder(args)
+			.ConfigureServices(services =>
+			{
+					services.AddScheduler();
+					services.AddTransient<Handler.Session>();
+			});
 
 	// This method is called whenever a new log message is generated (for debugging or logging purposes)
 	private static async Task LogMessage(LogMessage message)

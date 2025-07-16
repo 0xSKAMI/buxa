@@ -1,4 +1,5 @@
 using DB;
+using Coravel.Invocable;
 using System.Data.Common;
 using SteamN;
 using System.Text.Json;
@@ -6,7 +7,7 @@ using System.Text.Json;
 
 namespace Handler
 {
-	public class Session
+	public class Session : IInvocable
 	{
 		//initilize steam object
 		public static Steam stm = new Steam();
@@ -45,31 +46,27 @@ namespace Handler
 							string name = game.GetProperty("name").GetString();
 
 							await db.CreateSession(appId, discordId, playtime_full, playtime_windows, playtime_mac, playtime_linux, playtime_deck);
+							await db.UpdatePlayerGames(appId, discordId, playtime_full, playtime_windows, playtime_mac, playtime_linux, playtime_deck);
 						}
 					}));
 				}
 			}
 		}
-
-		public async Task SessionScheduler()
+		public async Task Invoke()
 		{
 			//creating database instance
 			Database db = Database.Instance;
 
-			while(true)
-			{
-				TimeSpan some = DateTime.Now.AddSeconds(3) - DateTime.Now;
+			TimeSpan some = DateTime.Now.AddSeconds(3) - DateTime.Now;
 
-				Dictionary<string, string> users = new Dictionary<string, string>();
+			Dictionary<string, string> users = new Dictionary<string, string>();
 
-				users = await db.GetAllUsers();
-				
-				foreach(var user in users)
+			users = await db.GetAllUsers();
+					
+			foreach(var user in users)
 				{
-					await CreateSessions(user.Key, user.Value);
+					CreateSessions(user.Key, user.Value);
 				}
-				await Task.Delay(TimeSpan.FromHours(12));
-			}
 		}
 	}
 }
