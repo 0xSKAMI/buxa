@@ -46,7 +46,7 @@ public class Program
 		// Log in the bot with the token a:wnd start the connection
 		await _client.LoginAsync(TokenType.Bot, token);
 		await _client.StartAsync();
-
+		ses.Invoke();
 		IHost host = CreateHostBuilder(args).Build();
 		host.Services.UseScheduler(scheduler => {
 				scheduler

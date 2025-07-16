@@ -45,6 +45,14 @@ namespace Handler
 							int playtime_deck = game.GetProperty("playtime_deck_forever").GetInt32() - playtime[4];
 							string name = game.GetProperty("name").GetString();
 
+							if (await db.GetGame(appId) == "1")
+							{
+								await db.UpdateGameTimeAdd(appId, playtime_full);
+							}
+							else
+							{
+								await db.CreateGame(appId, name, playtime_full);
+							}
 							await db.CreateSession(appId, discordId, playtime_full, playtime_windows, playtime_mac, playtime_linux, playtime_deck);
 							await db.UpdatePlayerGames(appId, discordId, playtime_full, playtime_windows, playtime_mac, playtime_linux, playtime_deck);
 						}
