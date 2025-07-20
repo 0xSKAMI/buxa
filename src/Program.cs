@@ -46,7 +46,7 @@ public class Program
 		// Log in the bot with the token a:wnd start the connection
 		await _client.LoginAsync(TokenType.Bot, token);
 		await _client.StartAsync();
-		ses.Invoke();
+
 		IHost host = CreateHostBuilder(args).Build();
 		host.Services.UseScheduler(scheduler => {
 				scheduler
@@ -54,10 +54,11 @@ public class Program
 					.Daily()
 					.Weekday();
 			});
-		host.Run();
 	
 		//start listening to port and give it TaskCompletionSource dictonary to return result 
 		_= Task.Run(async() => {while(true){Steam.ListenToPort(steamIdWaiters);};});
+
+		host.Run();
 
 		await Task.Delay(-1);
 	}
@@ -83,15 +84,39 @@ public class Program
 	private static async Task Create_command() 
 	{
 		//create command builder and give it description and name
-		var commandBuilder = new SlashCommandBuilder();
+		var connectBuilder = new SlashCommandBuilder();
 		
-		commandBuilder.WithName("connect");
-		commandBuilder.WithDescription("connects steam account to discord account");
+		connectBuilder.WithName("connect");
+		connectBuilder.WithDescription("connects steam account to discord account");
+
+		//create command builder and give it description and name
+		var weekBuilder = new SlashCommandBuilder()
+			.WithName("played")
+			.WithDescription("get most/least played game in some period of time")	
+			.AddOption(new SlashCommandOptionBuilder()
+				.WithName("determiner")
+				.WithDescription("most played game or least played game in some period of time")
+				.WithRequired(true)
+				.AddChoice("Most", 1)
+				.AddChoice("Lest", 2)
+				.WithType(ApplicationCommandOptionType.Integer)
+			)
+			.AddOption(new SlashCommandOptionBuilder()
+				.WithName("time")
+				.WithDescription("most played game or least played game in some period of time")
+				.WithRequired(true)
+				.AddChoice("Day", 1)
+				.AddChoice("Week", 2)
+				.AddChoice("Month", 3)
+				.AddChoice("Year", 4)
+				.WithType(ApplicationCommandOptionType.Integer)
+			);
 		
 		//try to build command and if something goes wrong write it in console
 		try
 		{
-			await _client.CreateGlobalApplicationCommandAsync(commandBuilder.Build());
+			await _client.CreateGlobalApplicationCommandAsync(connectBuilder.Build());
+			await _client.CreateGlobalApplicationCommandAsync(weekBuilder.Build());
 		}
 		catch 
 		{
@@ -141,6 +166,11 @@ public class Program
 						steamIdWaiters.Remove(command.User.Id);
 						await plr.ConnectPlayer(Convert.ToString(command.User.Id), long.Parse(steamId));
 					});
+					break;
+				}
+			case "played":
+				{
+					await command.RespondAsync("hey");
 					break;
 				}
 		}
