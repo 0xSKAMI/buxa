@@ -51,7 +51,7 @@ namespace Handler
 							}
 							else
 							{
-								await db.CreateGame(appId, name, playtime_full);
+								await db.CreateGame(appId, name, game.GetProperty("playtime_forever").GetInt32());
 							}
 							await db.CreateSession(appId, discordId, playtime_full, playtime_windows, playtime_mac, playtime_linux, playtime_deck);
 							await db.UpdatePlayerGames(appId, discordId, playtime_full, playtime_windows, playtime_mac, playtime_linux, playtime_deck);
