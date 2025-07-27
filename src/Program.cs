@@ -98,12 +98,12 @@ public class Program
 				.WithDescription("most played game or least played game in some period of time")
 				.WithRequired(true)
 				.AddChoice("Most", 1)
-				.AddChoice("Lest", 2)
+				.AddChoice("Least", 2)
 				.WithType(ApplicationCommandOptionType.Integer)
 			)
 			.AddOption(new SlashCommandOptionBuilder()
 				.WithName("time")
-				.WithDescription("most played game or least played game in some period of time")
+				.WithDescription("5 most/least played game or least played game in some period of time")
 				.WithRequired(true)
 				.AddChoice("Day", 1)
 				.AddChoice("Week", 2)
@@ -171,6 +171,7 @@ public class Program
 			case "played":
 				{
 					await command.RespondAsync("hey");
+					ses.TopSessions(command.User.Id, command.Data.Options.First().Value.ToString(), command.Data.Options.Last().Value.ToString());
 					break;
 				}
 		}

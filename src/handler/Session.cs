@@ -45,6 +45,9 @@ namespace Handler
 							int playtime_deck = game.GetProperty("playtime_deck_forever").GetInt32() - playtime[4];
 							string name = game.GetProperty("name").GetString();
 
+							Console.WriteLine(playtime[0]);
+							Console.WriteLine(game.GetProperty("playtime_forever").GetInt32());
+							Console.WriteLine(playtime_full);
 							if (await db.GetGame(appId) == "1")
 							{
 								await db.UpdateGameTimeAdd(appId, playtime_full);
@@ -60,6 +63,24 @@ namespace Handler
 				}
 			}
 		}
+
+		public async Task TopSessions(ulong id, string determiner, string time)
+		{
+			//creating database instance
+			Database db = Database.Instance;
+
+			string timespan = time switch
+			{
+				"1" => "1 day",
+				"2" => "1 week",
+				"3" => "1 month",
+				"4" => "1 year",
+				_ => throw new ArgumentOutOfRangeException(nameof(time), "Invalid time value")
+			};
+			
+			db.GetSessions(Convert.ToString(id), determiner, timespan);
+		}
+
 		public async Task Invoke()
 		{
 			//creating database instance

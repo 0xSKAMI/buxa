@@ -262,6 +262,24 @@ namespace DB
 			}
 		}
 
+		public async Task<List<Array>> GetSessions(string id, string determiner, string time)
+		{
+			await using var command = (determiner == "1") ? dataSource.CreateCommand("SELECT g.name AS game_name, SUM(s.played_time) AS total_played_time FROM sessions AS s JOIN games AS g ON s.gameid = g.gameid WHERE s.playerid = $1 AND s.creation_date >= NOW() - INTERVAL '$2' GROUP BY g.name ORDER BY total_played_time DESC LIMIT 5") : dataSource.CreateCommand("SELECT g.name AS game_name, SUM(s.played_time) AS total_played_time FROM sessions AS s JOIN games AS g ON s.gameid = g.gameid WHERE s.playerid = $1 AND s.creation_date >= NOW() - INTERVAL '$2' GROUP BY g.name ORDER BY total_played_time ASC LIMIT 5");
+
+			command.Parameters.AddWithValue(id);
+			command.Parameters.AddWithValue(time);
+
+			List<Array> result = new List<Array>();
+			await using var reader = await command.ExecuteReaderAsync();
+				Console.WriteLine(reader.HasRows);
+			while(await reader.ReadAsync())
+			{
+				Console.WriteLine(reader.HasRows);
+			}
+
+			return result;
+		}
+
 		public async Task CreateSession(int id, string playerId, int time, int windows_time, int mac_time, int linux_time, int deck_time)
 		{
 			await using var command = dataSource.CreateCommand("INSERT INTO sessions (gameid, playerid, played_time, windows_played, mac_played, linux_played, deck_played) VALUES ($1, $2, $3, $4, $5, $6, $7)");
