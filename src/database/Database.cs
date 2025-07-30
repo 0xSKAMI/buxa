@@ -262,16 +262,16 @@ namespace DB
 			}
 		}
 
-		public async Task<List<Array>> GetSessions(string id, string determiner, string time)
+		public async Task<List<Array>> GetSessions(string id, string determiner, TimeSpan time)
 		{
-			await using var command = (determiner == "1") ? dataSource.CreateCommand("SELECT g.name AS game_name, SUM(s.played_time) AS total_played_time FROM sessions AS s JOIN games AS g ON s.gameid = g.gameid WHERE s.playerid = $1 AND s.creation_date >= NOW() - INTERVAL '$2' GROUP BY g.name ORDER BY total_played_time DESC LIMIT 5") : dataSource.CreateCommand("SELECT g.name AS game_name, SUM(s.played_time) AS total_played_time FROM sessions AS s JOIN games AS g ON s.gameid = g.gameid WHERE s.playerid = $1 AND s.creation_date >= NOW() - INTERVAL '$2' GROUP BY g.name ORDER BY total_played_time ASC LIMIT 5");
+			await using var command = (determiner == "1") ? dataSource.CreateCommand("SELECT g.name AS game_name, SUM(s.played_time) AS total_played_time FROM sessions AS s JOIN games AS g ON s.gameid = g.gameid WHERE s.playerid = $1 AND s.creation_date >= NOW() - $2 GROUP BY g.name ORDER BY total_played_time DESC LIMIT 5") : dataSource.CreateCommand("SELECT g.name AS game_name, SUM(s.played_time) AS total_played_time FROM sessions AS s JOIN games AS g ON s.gameid = g.gameid WHERE s.playerid = $1 AND s.creation_date >= NOW() - INTERVAL '$2' GROUP BY g.name ORDER BY total_played_time ASC LIMIT 5");
 
 			command.Parameters.AddWithValue(id);
 			command.Parameters.AddWithValue(time);
 
 			List<Array> result = new List<Array>();
 			await using var reader = await command.ExecuteReaderAsync();
-				Console.WriteLine(reader.HasRows);
+			Console.WriteLine(reader.HasRows);
 			while(await reader.ReadAsync())
 			{
 				Console.WriteLine(reader.HasRows);

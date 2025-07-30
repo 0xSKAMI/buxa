@@ -1,4 +1,5 @@
 using DB;
+using System;
 using Coravel.Invocable;
 using System.Data.Common;
 using SteamN;
@@ -69,15 +70,16 @@ namespace Handler
 			//creating database instance
 			Database db = Database.Instance;
 
-			string timespan = time switch
+			TimeSpan timespan = time switch
 			{
-				"1" => "1 day",
-				"2" => "1 week",
-				"3" => "1 month",
-				"4" => "1 year",
+				"1" => TimeSpan.FromDays(1),
+				"2" => TimeSpan.FromDays(7),
+				"3" => TimeSpan.FromDays(30),
+				"4" => TimeSpan.FromDays(364),
 				_ => throw new ArgumentOutOfRangeException(nameof(time), "Invalid time value")
 			};
 			
+			Console.WriteLine(timespan);
 			db.GetSessions(Convert.ToString(id), determiner, timespan);
 		}
 
