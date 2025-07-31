@@ -65,7 +65,7 @@ namespace Handler
 			}
 		}
 
-		public async Task TopSessions(ulong id, string determiner, string time)
+		public async Task<List<Array>> TopSessions(ulong id, string determiner, string time)
 		{
 			//creating database instance
 			Database db = Database.Instance;
@@ -79,8 +79,9 @@ namespace Handler
 				_ => throw new ArgumentOutOfRangeException(nameof(time), "Invalid time value")
 			};
 			
-			Console.WriteLine(timespan);
-			db.GetSessions(Convert.ToString(id), determiner, timespan);
+			var result = await db.GetSessions(Convert.ToString(id), determiner, timespan);
+
+			return result;
 		}
 
 		public async Task Invoke()

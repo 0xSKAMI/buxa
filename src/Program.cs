@@ -170,8 +170,32 @@ public class Program
 				}
 			case "played":
 				{
-					await command.RespondAsync("hey");
-					ses.TopSessions(command.User.Id, command.Data.Options.First().Value.ToString(), command.Data.Options.Last().Value.ToString());
+					//get top games list of array
+					var tops = await ses.TopSessions(command.User.Id, command.Data.Options.First().Value.ToString(), command.Data.Options.Last().Value.ToString());
+
+					//if list is empty return
+					if(tops.Count == 0)
+					{
+						await command.RespondAsync("We have no records of you playing game");
+						break;
+					}
+
+					//create embed to respond
+					string determiner = (command.Data.Options.First().Value.ToString() == "1") ? "most" : "least";
+					var embedBuilder = new EmbedBuilder()
+							.WithAuthor(command.User)
+							.WithTitle($"Top {determiner} most played games")
+							.WithColor(Color.Green)
+							.WithCurrentTimestamp();
+
+					//use foreach and modify embedbuilder
+					foreach (string[] arr in tops)
+					{
+						embedBuilder.AddField($"**Name**: {arr[0]}", $"**Time Spent:** {arr[1]}", true);
+					}
+
+					await command.RespondAsync(embed: embedBuilder.Build());
+
 					break;
 				}
 		}

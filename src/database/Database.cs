@@ -271,10 +271,10 @@ namespace DB
 
 			List<Array> result = new List<Array>();
 			await using var reader = await command.ExecuteReaderAsync();
-			Console.WriteLine(reader.HasRows);
 			while(await reader.ReadAsync())
 			{
-				Console.WriteLine(reader.HasRows);
+				string[] top = new string[] {Convert.ToString(reader.GetValue(0)), Convert.ToString(reader.GetValue(1))};
+				result.Add(top);
 			}
 
 			return result;
