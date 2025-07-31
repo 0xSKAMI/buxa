@@ -82,7 +82,6 @@ namespace Handler
 							if (await db.GetGame(appId) == "1")
 							{
 								await db.UpdateGameTimeSub(appId, playtime);
-								Console.WriteLine("saba");
 							}
 						}));
 					}

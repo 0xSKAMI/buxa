@@ -46,9 +46,6 @@ namespace Handler
 							int playtime_deck = game.GetProperty("playtime_deck_forever").GetInt32() - playtime[4];
 							string name = game.GetProperty("name").GetString();
 
-							Console.WriteLine(playtime[0]);
-							Console.WriteLine(game.GetProperty("playtime_forever").GetInt32());
-							Console.WriteLine(playtime_full);
 							if (await db.GetGame(appId) == "1")
 							{
 								await db.UpdateGameTimeAdd(appId, playtime_full);
