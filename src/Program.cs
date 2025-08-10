@@ -170,33 +170,42 @@ public class Program
 				}
 			case "played":
 				{
-					//get top games list of array
-					var tops = await ses.TopSessions(command.User.Id, command.Data.Options.First().Value.ToString(), command.Data.Options.Last().Value.ToString());
-
-					//if list is empty return
-					if(tops.Count == 0)
+					try
 					{
-						await command.RespondAsync("We have no records of you playing game");
+						//get top games list of array
+						var tops = await ses.TopSessions(command.User.Id, command.Data.Options.First().Value.ToString(), command.Data.Options.Last().Value.ToString());
+
+						//if list is empty return
+						if(tops.Count == 0)
+						{
+							Console.WriteLine("saba");
+							await command.RespondAsync("We have no records of you playing game");
+							break;
+						}
+
+						//create embed to respond
+						string determiner = (command.Data.Options.First().Value.ToString() == "1") ? "most" : "least";
+						var embedBuilder = new EmbedBuilder()
+								.WithAuthor(command.User)
+								.WithTitle($"Top {determiner} most played games")
+								.WithColor(Color.Green)
+								.WithCurrentTimestamp();
+
+						//use foreach and modify embedbuilder
+						foreach (string[] arr in tops)
+						{
+							embedBuilder.AddField($"**Name**: {arr[0]}", $"**Time Spent:** {arr[1]}", true);
+						}
+
+						await command.RespondAsync(embed: embedBuilder.Build());
+
 						break;
 					}
-
-					//create embed to respond
-					string determiner = (command.Data.Options.First().Value.ToString() == "1") ? "most" : "least";
-					var embedBuilder = new EmbedBuilder()
-							.WithAuthor(command.User)
-							.WithTitle($"Top {determiner} most played games")
-							.WithColor(Color.Green)
-							.WithCurrentTimestamp();
-
-					//use foreach and modify embedbuilder
-					foreach (string[] arr in tops)
+					catch
 					{
-						embedBuilder.AddField($"**Name**: {arr[0]}", $"**Time Spent:** {arr[1]}", true);
+						await command.RespondAsync("something wen't wrong");
+						break;
 					}
-
-					await command.RespondAsync(embed: embedBuilder.Build());
-
-					break;
 				}
 		}
 	}

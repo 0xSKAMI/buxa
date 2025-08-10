@@ -264,20 +264,32 @@ namespace DB
 
 		public async Task<List<Array>> GetSessions(string id, string determiner, TimeSpan time)
 		{
+			//create command based on determiner (most/least)
 			await using var command = (determiner == "1") ? dataSource.CreateCommand("SELECT g.name AS game_name, SUM(s.played_time) AS total_played_time FROM sessions AS s JOIN games AS g ON s.gameid = g.gameid WHERE s.playerid = $1 AND s.creation_date >= NOW() - $2 GROUP BY g.name ORDER BY total_played_time DESC LIMIT 5") : dataSource.CreateCommand("SELECT g.name AS game_name, SUM(s.played_time) AS total_played_time FROM sessions AS s JOIN games AS g ON s.gameid = g.gameid WHERE s.playerid = $1 AND s.creation_date >= NOW() - INTERVAL '$2' GROUP BY g.name ORDER BY total_played_time ASC LIMIT 5");
 
+			//adding parameters (id and time)
 			command.Parameters.AddWithValue(id);
 			command.Parameters.AddWithValue(time);
 
+			//create result to return in future
 			List<Array> result = new List<Array>();
-			await using var reader = await command.ExecuteReaderAsync();
-			while(await reader.ReadAsync())
+			try
 			{
-				string[] top = new string[] {Convert.ToString(reader.GetValue(0)), Convert.ToString(reader.GetValue(1))};
-				result.Add(top);
-			}
+				//executing command 
+				await using var reader = await command.ExecuteReaderAsync();
+				//adding readed material to result
+				while(await reader.ReadAsync())
+				{
+					string[] top = new string[] {Convert.ToString(reader.GetValue(0)), Convert.ToString(reader.GetValue(1))};
+					result.Add(top);
+				}
 
-			return result;
+				return result;
+			}
+			catch 
+			{
+				throw;
+			}
 		}
 
 		public async Task CreateSession(int id, string playerId, int time, int windows_time, int mac_time, int linux_time, int deck_time)
