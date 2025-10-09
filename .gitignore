@@ -1,8 +1,3 @@
-bin
-obj
 .env
-Folder.DotSettings.user
-3
-.idea
 *.sw*
 .vimrc
