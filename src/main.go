@@ -7,6 +7,7 @@ import (
 	"syscall"
 	"strings"
 	"os/exec"
+	"bytes"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
@@ -16,16 +17,6 @@ import (
 var linking = map[string]string{};
 
 func main() {
-	cmd := exec.Command("ls", "./");
-	if err := cmd.Run(); err != nil {
-		fmt.Println("hi");
-	}
-
-	out, err := cmd.Output();
-
-	fmt.Println(string(out));
-	fmt.Println(err);
-
 	//importing .env variables
 	godotenv.Load("../.env");
 	var token string = os.Getenv("TOKEN");
@@ -61,7 +52,6 @@ func main() {
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	//check if reel is send
 	if strings.HasPrefix(m.Content, "https://www.instagram.com/reel/") && m.Author.ID != s.State.User.ID {
 		//do some cool operations
 		_, ok := linking[m.ID];
@@ -70,6 +60,20 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return;
 		}
 		linking[m.ID] = m.Content;
-		s.ChannelMessageDelete(m.ChannelID, m.ID);
+
+		cmd := exec.Command("yt-dlp", "-q", "-o", "-", "-t", "mp4", m.Content);
+
+		var out bytes.Buffer;
+		cmd.Stdout = &out;
+		var err error;
+		if err := cmd.Run();  err != nil {
+			fmt.Println("error running command", err);
+			s.ChannelMessageSend(m.ChannelID, "some error happened");
+			return;
+		};
+
+		fmt.Println(err);
+
+		s.ChannelFileSendWithMessage(m.ChannelID, "here is your video", "test.mp4", &out);
 	}
 }
