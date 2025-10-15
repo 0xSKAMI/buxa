@@ -8,7 +8,7 @@ import (
 	"strings"
 	"os/exec"
 	"bytes"
-
+	
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 )
@@ -52,7 +52,21 @@ func main() {
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if strings.HasPrefix(m.Content, "https://www.instagram.com/reel/") && m.Author.ID != s.State.User.ID {
+	//check if user send link from instagram
+	if strings.Contains(m.Content, "https://www.instagram.com/") && m.Author.ID != s.State.User.ID {
+		//create array of worlds in the message (if message is like wow https://www.instagram.com/)
+		words := strings.Fields(m.Content);
+		//this variable will hold link from words
+		var link string;
+
+		//this is for getting and setting reel link in link variable
+		for _, element := range words {
+			if (strings.HasPrefix(element, "https://www.instagram.com/")) {
+				link = element;
+				break;
+			}
+		}
+		
 		//do some cool operations
 		_, ok := linking[m.ID];
 		if ok == true {
@@ -61,19 +75,29 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		linking[m.ID] = m.Content;
 
-		cmd := exec.Command("yt-dlp", "-q", "-o", "-", "-t", "mp4", m.Content);
+		//creaet command to download video in mp4 format
+		cmd := exec.Command("yt-dlp", "-q", "-o", "-", "-t", "mp4", link);
 
+		//declare buffer that will hold video
 		var out bytes.Buffer;
 		cmd.Stdout = &out;
 		var err error;
+		//error handling (normal)
 		if err := cmd.Run();  err != nil {
 			fmt.Println("error running command", err);
 			s.ChannelMessageSend(m.ChannelID, "some error happened");
 			return;
 		};
 
+		//developer purposes
 		fmt.Println(err);
 
-		s.ChannelFileSendWithMessage(m.ChannelID, "here is your video", "test.mp4", &out);
+		//sednig video (.mp4 after the name can be changed to some other more compressed format)
+		if uploaded, err := s.ChannelFileSendWithMessage(m.ChannelID, "here is your video", "test.mp4", &out); err != nil {
+			s.ChannelMessageSend(m.ChannelID, "file is too large");
+			fmt.Println(err);
+			fmt.Println(uploaded);
+			return;
+		}
 	}
 }
