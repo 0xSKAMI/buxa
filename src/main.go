@@ -95,7 +95,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		//sednig video (.mp4 after the name can be changed to some other more compressed format)
 		if uploaded, err := s.ChannelFileSendWithMessage(m.ChannelID, "here is your video", "test.mp4", &out); err != nil {
 			s.ChannelMessageSend(m.ChannelID, "file is too large");
-			fmt.Println(err);
+			fmt.Println("file is too large:", err);
 			fmt.Println(uploaded);
 			return;
 		}
