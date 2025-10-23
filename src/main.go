@@ -76,7 +76,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		linking[m.ID] = m.Content;
 
 		//creaet command to download video in mp4 format
-		cmd := exec.Command("yt-dlp", "-q", "-o", "-", "-t", "mp4", link);
+		cmd := exec.Command("yt-dlp", "-q", "-o", "-", "--cookies", "cookies.txt", "-t", "mp4", link);
 
 		//declare buffer that will hold video
 		var out bytes.Buffer;
