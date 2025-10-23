@@ -11,7 +11,7 @@ WORKDIR /app/server
 RUN CGO_ENABLED=0 GOOS=linux go build -o /server
 
 # Stage 2: Create a minimal image for the final executable
-FROM ubuntu:latest
+FROM alpine:3.22
 
 # Set the working directory
 WORKDIR /root/
@@ -22,11 +22,11 @@ COPY --from=builder /server .
 # Expose the port your Go server listens on
 EXPOSE 8080
 
-RUN apt update
+RUN apk -U add yt-dlp
 
-RUN apt install -y yt-dlp
+RUN apk -U add yt-dlp-core
 
-RUN apt install -y ffmpeg
+RUN apk -U upgrade yt-dlp
 
 # Command to run the application
 CMD ["./server"]
