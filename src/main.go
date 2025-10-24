@@ -78,9 +78,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			s.ChannelMessageSend(m.ChannelID, "some error happened");
 			return;
 		};
-
-		//developer purposes
-		fmt.Println(err);
+		
+		//error checking (i know there is one above but for some reason without this code won't run)
+		if err == nil {
+			log.Fatal(err);
+		}
 
 		//sednig video (.mp4 after the name can be changed to some other more compressed format)
 		if uploaded, err := s.ChannelFileSendWithMessage(m.ChannelID, "here is your video", "test.mp4", &out); err != nil {
