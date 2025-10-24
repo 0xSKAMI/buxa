@@ -8,13 +8,11 @@ import (
 	"strings"
 	"os/exec"
 	"bytes"
+	"log"
 	
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 )
-
-//declare map to store messages id and links they send
-var linking = map[string]string{};
 
 func main() {
 	//importing .env variables
@@ -66,14 +64,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				break;
 			}
 		}
-		
-		//do some cool operations
-		_, ok := linking[m.ID];
-		if ok == true {
-			fmt.Println("value was in the map already");
-			return;
-		}
-		linking[m.ID] = m.Content;
 
 		//creaet command to download video in mp4 format
 		cmd := exec.Command("yt-dlp", "-q", "-o", "-", "--cookies", "cookies.txt", "-t", "mp4", link);
@@ -84,7 +74,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		var err error;
 		//error handling (normal)
 		if err := cmd.Run();  err != nil {
-			fmt.Println("error running command", err);
+			log.Fatal(err);
 			s.ChannelMessageSend(m.ChannelID, "some error happened");
 			return;
 		};
@@ -95,7 +85,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		//sednig video (.mp4 after the name can be changed to some other more compressed format)
 		if uploaded, err := s.ChannelFileSendWithMessage(m.ChannelID, "here is your video", "test.mp4", &out); err != nil {
 			s.ChannelMessageSend(m.ChannelID, "file is too large");
-			fmt.Println("file is too large:", err);
+			log.Fatal(err);
 			fmt.Println(uploaded);
 			return;
 		}
