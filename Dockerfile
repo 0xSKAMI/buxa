@@ -2,11 +2,9 @@ FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
-COPY ./go.mod ./go.sum ./
+COPY ./ ./
 
-COPY ./src ./server/
-
-WORKDIR /app/server
+WORKDIR /app
 	
 RUN CGO_ENABLED=0 GOOS=linux go build -o /server
 
@@ -30,4 +28,3 @@ RUN apk -U upgrade yt-dlp
 
 # Command to run the application
 CMD ["./server"]
-
