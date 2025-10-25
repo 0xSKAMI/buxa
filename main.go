@@ -16,7 +16,7 @@ import (
 
 func main() {
 	//importing .env variables
-	godotenv.Load("../.env");
+	godotenv.Load("./.env");
 	var token string = os.Getenv("TOKEN");
 
 	//craeting discord client
