@@ -70,18 +70,22 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		//declare buffer that will hold video
 		var out bytes.Buffer;
+		var stderr bytes.Buffer;
 		cmd.Stdout = &out;
+		cmd.Stderr = &stderr;
 		var err error;
 		//error handling (normal)
 		if err := cmd.Run();  err != nil {
+			fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
 			log.Fatal(err);
 			s.ChannelMessageSend(m.ChannelID, "some error happened");
 			return;
 		};
 		
 		//error checking (i know there is one above but for some reason without this code won't run)
-		if err == nil {
+		if err != nil {
 			log.Fatal(err);
+			return;
 		}
 
 		//sednig video (.mp4 after the name can be changed to some other more compressed format)
